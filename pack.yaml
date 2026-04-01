@@ -1,0 +1,12 @@
+
+
+ref: st2-annotationtracks
+name: st2-annotationtracks
+description: Testing how StackStorm works
+keywords:
+  - python3
+version: 0.0.1
+python_version:
+ - "3"
+author: Moa
+email: Moa.ogren@internet.com

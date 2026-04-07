@@ -2,5 +2,5 @@
 name: hello_st2
 enabled: True
 description: Sya Hello to StackStorm
-runner_type: python_script
+runner_type: python-script
 entry_point: hello_st2.py

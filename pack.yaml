@@ -1,7 +1,7 @@
 
 
-ref: st2-annotationtracks
-name: st2-annotationtracks
+ref: st2_annotationtracks
+name: st2_annotationtracks
 description: Testing how StackStorm works
 keywords:
   - python3

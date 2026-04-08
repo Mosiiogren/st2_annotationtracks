@@ -2,6 +2,6 @@
 
 set -e
 
-docker compose -f docker-compose.yml logs
+docker compose -f docker-compose.yaml logs
 
 echo "Working"

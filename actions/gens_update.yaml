@@ -7,3 +7,8 @@ entry_point: gens_update.sh
 parameters:
   hosts:
     default: "localhost"
+  cwd:
+    type: string
+    description: Path to where the docker compose file is positioned
+    required: True
+    

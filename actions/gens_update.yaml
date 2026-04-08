@@ -4,3 +4,6 @@ enabled: True
 description: Docker commando for Gens
 runner_type: remote-shell-script
 entry_point: gens_update.sh
+parameters:
+  hosts:
+    default: "localhost"

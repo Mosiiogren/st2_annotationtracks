@@ -11,6 +11,6 @@ docker compose -f docker-compose.yaml ${DOCKERCOMMAND}
 
 echo "Working #1"
 
-#${MONGOCOMMAND}
+${MONGOCOMMAND}
 
 #echo "Working #2"

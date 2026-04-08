@@ -24,12 +24,12 @@ parameters:
   inputfirst:
     type: string
     description: Input
-    required: True
+    required: false
     position: 2
   inputsecond:
     type: string
     description: Input
-    required: True
+    required: false
     position: 3
 
     

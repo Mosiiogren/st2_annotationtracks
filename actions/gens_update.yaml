@@ -11,9 +11,14 @@ parameters:
     type: string
     description: Path to where the docker compose file is positioned
     required: True
-  command:
+  dockercommand:
     type: string
-    description: Docker command to the executed
+    description: Docker command to be executed
     default: "logs"
     position: 0
+  mongocommand:
+    type: string
+    description: Mongo command to be executed
+    default: "show dbs"
+    position: 1
     

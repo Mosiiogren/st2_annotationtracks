@@ -11,4 +11,9 @@ parameters:
     type: string
     description: Path to where the docker compose file is positioned
     required: True
+  command:
+    type: string
+    description: Docker command to the executed
+    default: "logs"
+    position: 0
     

@@ -2,8 +2,13 @@
 
 set -e
 
-COMMAND=$1
+DOCKERCOMMAND=$1
+MONGOCOMMAND=$2
 
-docker compose -f docker-compose.yaml ${COMMAND}
+docker compose -f docker-compose.yaml ${DOCKERCOMMAND}
 
-echo "Working"
+echo "Working #1"
+
+${MONGOCOMMAND}
+
+echo "Working #2"

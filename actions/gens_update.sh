@@ -2,7 +2,7 @@
 
 set -e
 
-COMMAND = $1
+COMMAND = $0
 
 docker compose -f docker-compose.yaml ${COMMAND}
 

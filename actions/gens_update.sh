@@ -2,6 +2,8 @@
 
 set -e
 
-docker compose -f docker-compose.yaml logs
+COMMAND = $1
+
+docker compose -f docker-compose.yaml ${COMMAND}
 
 echo "Working"

@@ -7,10 +7,10 @@ MONGOCOMMAND=$2
 INPUTFIRST=$3
 INPUTSECOND=$4
 
-docker compose -f docker-compose.yaml ${DOCKERCOMMAND} -u ${INPUTFIRST} -p ${INPUTSECOND}
+docker compose -f docker-compose.yaml ${DOCKERCOMMAND}
 
 echo "Working #1"
 
-${MONGOCOMMAND}
+#${MONGOCOMMAND}
 
-echo "Working #2"
+#echo "Working #2"

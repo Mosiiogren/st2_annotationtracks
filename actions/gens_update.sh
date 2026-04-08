@@ -7,7 +7,7 @@ MONGOCOMMAND=$2
 INPUTFIRST=$3
 INPUTSECOND=$4
 
-docker compose -f docker-compose.yaml ${DOCKERCOMMAND}
+docker compose -f docker-compose.yaml ${DOCKERCOMMAND} -u ${INPUTFIRST} -p ${INPUTSECOND} ${MONGOCOMMANDO}
 
 echo "Working #"
 

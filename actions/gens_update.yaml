@@ -21,4 +21,16 @@ parameters:
     description: Mongo command to be executed
     default: "show dbs"
     position: 1
+  username:
+    type: string
+    description: Mongo username
+    required: True
+    position: 2
+  password:
+    type: string
+    description: Mongo password
+    required: True
+    position: 3
+
+    
     

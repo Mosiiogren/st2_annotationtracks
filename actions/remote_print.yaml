@@ -3,7 +3,7 @@ name: remote_print
 runner_type: remote-shell-script
 description: Action which periodically prints to stdout and stderr. Useful for testing action output streaming.
 enabled: true
-entry_point: print_to_stdout_and_stderr.sh
+entry_point: remote_print.sh
 parameters:
   hosts:
     default: "localhost"

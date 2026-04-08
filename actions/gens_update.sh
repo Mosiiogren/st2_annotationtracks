@@ -3,3 +3,5 @@
 set -e
 
 docker compose -f docker-compose.yml logs
+
+echo "Working"

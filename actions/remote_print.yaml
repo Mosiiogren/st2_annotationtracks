@@ -1,5 +1,5 @@
 ---
-name: remote_script_runner_print_to_stdout_and_stderr
+name: remote_print
 runner_type: remote-shell-script
 description: Action which periodically prints to stdout and stderr. Useful for testing action output streaming.
 enabled: true
@@ -11,7 +11,7 @@ parameters:
     type: integer
     description: "Number of repetitions."
     required: true
-    default: 100
+    default: 10
     position: 1
   sleep_delay:
     type: number

@@ -21,14 +21,14 @@ parameters:
     description: Mongo command to be executed
     default: "show dbs"
     position: 1
-  username:
+  inputfirst:
     type: string
-    description: Mongo username
+    description: Input
     required: True
     position: 2
-  password:
+  inputsecond:
     type: string
-    description: Mongo password
+    description: Input
     required: True
     position: 3
 

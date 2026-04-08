@@ -20,6 +20,7 @@ parameters:
     type: string
     description: Mongo command to be executed
     default: "show dbs"
+    required: false
     position: 1
   inputfirst:
     type: string

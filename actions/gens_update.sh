@@ -4,10 +4,10 @@ set -e
 
 DOCKERCOMMAND=$1
 MONGOCOMMAND=$2
-USERNAME=$3
-PASSWORD=$4
+INPUTFIRST=$3
+INPUTSECOND=$4
 
-docker compose -f docker-compose.yaml ${DOCKERCOMMAND} -u ${USERNAME} -p ${PASSWORD}
+docker compose -f docker-compose.yaml ${DOCKERCOMMAND} -u ${INPUTFIRST} -p ${INPUTSECOND}
 
 echo "Working #1"
 

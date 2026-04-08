@@ -9,8 +9,5 @@ INPUTSECOND=$4
 
 docker compose -f docker-compose.yaml ${DOCKERCOMMAND}
 
-echo "Working #1"
+echo "Working #"
 
-${MONGOCOMMAND}
-
-#echo "Working #2"

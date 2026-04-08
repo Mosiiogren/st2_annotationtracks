@@ -7,8 +7,8 @@ MONGOCOMMAND=$2
 INPUTFIRST=$3
 INPUTSECOND=$4
 
-docker compose -f docker-compose.yaml ${DOCKERCOMMAND}
-#docker compose -f docker-compose.yaml ${DOCKERCOMMAND} --username=${INPUTFIRST} --password=${INPUTSECOND} ${MONGOCOMMANDO}
+#docker compose -f docker-compose.yaml ${DOCKERCOMMAND}
+docker compose -f docker-compose.yaml ${DOCKERCOMMAND} --username=${INPUTFIRST} --password=${INPUTSECOND} ${MONGOCOMMANDO}
 
 echo "Working #"
 

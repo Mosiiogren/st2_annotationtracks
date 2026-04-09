@@ -4,6 +4,12 @@ description: Upload the annotation trackfiles to Gens
 runner_type: remote-shell-script
 entry_point: upload_tracks_to_gens.sh
 parameters:
+  hosts:
+    default: "localhost"
+  cwd:
+    type: string
+    description: Path to where the docker compose file is positioned
+    required: True
   annotationtrackfile:
     type: object
     description: CSV file containing the annotationtracks that is being uploaded to Gens

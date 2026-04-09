@@ -1,7 +1,7 @@
 name: copy_to_gens
 enabled: True
 description: Copy the annotationtracks into the Gens container
-runner_type: python-script
+runner_type: remote-shell-script
 entry_point: copy_to_gens.sh
 parameters:
   annotationtracks:

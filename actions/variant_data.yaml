@@ -12,3 +12,4 @@ parameters:
     type: string
     description: Path to where the variant data has been stored
     required: True
+    position: 0

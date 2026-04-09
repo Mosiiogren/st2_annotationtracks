@@ -4,10 +4,6 @@ description: Retrieve and filter variant data
 runner_type: python-script
 entry_point: variant_data.py
 parameters:
-  hosts:
-    type: string
-    description: The server where the file is positioned at
-    required: True
   variantfile:
     type: string
     description: Path to where the variant data has been stored

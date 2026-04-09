@@ -5,7 +5,9 @@ runner_type: python-script
 entry_point: variant_data.py
 parameters:
   hosts:
-    default: "localhost"
+    type: string
+    description: The server where the file is positioned at
+    required: True
   cwd:
     type: string
     description: Path to where the docker compose file is positioned

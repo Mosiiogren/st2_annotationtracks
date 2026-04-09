@@ -1,7 +1,7 @@
 import pandas as pd
 from st2common.runners.base_action import Action
 
-class VariantData (Action):
+class Clustering (Action):
 
     def run (self, variantdata, genedata, regulatorydata):
         print ("Hello from clustering")

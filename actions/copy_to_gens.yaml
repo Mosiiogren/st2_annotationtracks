@@ -1,0 +1,11 @@
+name: copy_to_gens
+enabled: True
+description: Copy the annotationtracks into the Gens container
+runner_type: python-script
+entry_point: copy_to_gens.sh
+parameters:
+  annotationtracks:
+    type: object
+    description: CSV file containing the annotationtracks
+    required: True
+    position: 0

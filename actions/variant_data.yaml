@@ -1,0 +1,10 @@
+name: variant_data
+enabled: True
+description: Retrieve and filter variant data
+runner_type: python-script
+entry_point: variant_data.py
+parameters:
+  variantfile:
+    type: string
+    description: Path to where the variant data has been stored
+    default: "/data/dumps/annotationtracks.csv"

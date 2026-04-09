@@ -4,6 +4,12 @@ description: Retrieve and filter variant data
 runner_type: python-script
 entry_point: variant_data.py
 parameters:
+  hosts:
+    default: "localhost"
+  cwd:
+    type: string
+    description: Path to where the docker compose file is positioned
+    required: True
   variantfile:
     type: string
     description: Path to where the variant data has been stored

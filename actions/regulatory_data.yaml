@@ -1,0 +1,10 @@
+name: regulatory_data
+enabled: True
+description: Retrieve and filter regulatory data
+runner_type: python-script
+entry_point: regulatory_data.py
+parameters:
+  regulatoryfile:
+    type: string
+    description: Path to where the regulatory data has been stored
+    required: True

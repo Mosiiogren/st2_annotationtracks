@@ -8,3 +8,7 @@ parameters:
     type: string
     description: Path to where the gene data has been stored
     required: True
+  MANEfile:
+    type: string
+    description: Path to where the MANE status data has been stored
+    required: True

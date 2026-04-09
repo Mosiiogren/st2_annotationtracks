@@ -8,3 +8,4 @@ parameters:
     type: string
     description: Path to where the regulatory data has been stored
     required: True
+    position: 0

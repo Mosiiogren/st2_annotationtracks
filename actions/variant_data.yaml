@@ -6,6 +6,6 @@ entry_point: variant_data.py
 parameters:
   variantfile:
     type: string
-    description: Path to where the variant data has been stored
+    description: Filename of the file where the variant data has been stored
     required: True
     position: 0

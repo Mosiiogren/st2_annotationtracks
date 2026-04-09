@@ -8,10 +8,6 @@ parameters:
     type: string
     description: The server where the file is positioned at
     required: True
-  cwd:
-    type: string
-    description: Path to where the docker compose file is positioned
-    required: True
   variantfile:
     type: string
     description: Path to where the variant data has been stored

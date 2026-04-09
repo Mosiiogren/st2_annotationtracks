@@ -1,0 +1,11 @@
+name: annotationtracks
+enabled: True
+description: Creates annotation trackfiles from the clustereddata
+runner_type: python-script
+entry_point: annotationtracks.py
+parameters:
+  clusteringdata:
+    type: object
+    description: Dataframe containing clustered data
+    required: True
+    position: 0

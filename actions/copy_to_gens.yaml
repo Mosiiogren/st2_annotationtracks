@@ -4,6 +4,12 @@ description: Copy the annotationtracks into the Gens container
 runner_type: remote-shell-script
 entry_point: copy_to_gens.sh
 parameters:
+  hosts:
+    default: "localhost"
+  cwd:
+    type: string
+    description: Path to where the docker compose file is positioned
+    required: True
   annotationtracks:
     type: object
     description: CSV file containing the annotationtracks

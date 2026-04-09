@@ -104,7 +104,7 @@ get_regulatory_data:
 
 
   copy_into_gens_container:
-    action: st2_annotationtracks.gens_update
+    action: st2_annotationtracks.copy_to_gens
     input:
       annotationtracks: <% ctx(annotationtracks) %> 
     next:
@@ -120,7 +120,7 @@ get_regulatory_data:
           - report_failure 
 
   upload_to_gens:
-    action: st2_annotationtracks.gens_upload
+    action: st2_annotationtracks.upload_tracks_to_gens
     next:
       - when: "{{ succeeded() }}"
       - publish:

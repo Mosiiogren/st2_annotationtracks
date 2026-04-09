@@ -16,6 +16,7 @@ vars:
   - regulatorydata:
   - clusteringdata:
   - annotationtracks:
+  - annotationtrackfile:
 
 tasks:
   get_variant_data:
@@ -121,6 +122,8 @@ get_regulatory_data:
 
   upload_to_gens:
     action: st2_annotationtracks.upload_tracks_to_gens
+    input:
+      annotationtrackfile: basename <% ctx(annotationtracks) %>
     next:
       - when: "{{ succeeded() }}"
       - publish:

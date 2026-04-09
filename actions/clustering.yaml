@@ -1,0 +1,22 @@
+name: clustering
+enabled: True
+description: Cluster the given variants based on similarity and functions
+runner_type: python-script
+entry_point: clustering.py
+parameters:
+  variantdata:
+    type: object
+    description: Dataframe containing variant data
+    required: True
+    position: 0
+  genedata:
+    type: object
+    description: Dataframe containing gene data
+    required: True
+    position: 1
+  regulatorydata:
+    type: object
+    description: Dataframe containing regulatorydata
+    required: True
+    position: 2
+  

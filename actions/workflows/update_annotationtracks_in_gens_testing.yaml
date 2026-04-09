@@ -1,0 +1,157 @@
+version: 1.0
+name: update_annotationtracks_in_gens_testing
+description: Workflow to create annotationtracks and update the existing annotationtracks in Gens
+input:
+  - hosts
+  - cwd
+  - genedata
+  - MANEdata
+  - regulatorydata
+
+vars:
+  - host:
+  - variantfilename:
+  - variantfile:
+  - variantdata:
+  - genefile:
+  - genedata:
+  - regulatoryfile:
+  - regulatorydata:
+  - clusteringdata:
+  - annotationtracks:
+  - annotationtrackfile:
+
+tasks:
+  open_variant_file:
+    action: core.remote
+    input: 
+      cmd: head -1 <% ctx().variantfilename %>
+    next:
+      - when: "{{ succeeded() }}"
+      - publish:
+          variantfile: <% result().output.stdout %>
+      - do:
+          get_variant_data
+      - when: "{{ failed() }}"
+        publish:
+          - msg: "{{ result() }}"
+        do:
+          - report_failure
+
+  get_variant_data:
+    action: st2_annotationtracks.variant_data
+    input:
+      variantfile: <% ctx().variantfile %> 
+    next:
+      - when: "{{ succeeded() }}"
+      - publish:
+          variantdata: <% result().stdout %>
+      - do:
+          get_gene_data
+      - when: "{{ failed() }}"
+        publish:
+          - msg: "{{ result() }}"
+        do:
+          - report_failure
+
+
+  get_gene_data:
+    action: st2_annotationtracks.gene_data
+    input:
+      genefile: <% ctx().genedata %> 
+      MANEfile: <% ctx().MANEdata %> 
+    next:
+      - when: "{{ succeeded() }}"
+      - publish:
+          genedata: <% result().stdout %>
+      - do:
+          get_regulatory_data
+      - when: "{{ failed() }}"
+        publish:
+          - msg: "{{ result() }}"
+        do:
+          - report_failure         
+
+get_regulatory_data:
+    action: st2_annotationtracks.regulatory_data
+    input:
+      regulatoryfile: <% ctx().regulatoryfile %> 
+    next:
+      - when: "{{ succeeded() }}"
+      - publish:
+          regulatorydata: <% result().stdout %>
+      - do:
+          make_clustering
+      - when: "{{ failed() }}"
+        publish:
+          - msg: "{{ result() }}"
+        do:
+          - report_failure  
+
+  make_clustering:
+    action: st2_annotationtracks.clustering
+    input:
+      variantdata: <% ctx(variantdata) %>
+      genedata: <% ctx(gendata) %>
+      regulatorydata: <% ctx(regulatorydata) %>
+    next:
+      - when: "{{ succeeded() }}"
+      - publish:
+          clusteringdata: <% result().stdout %>
+      - do:
+          make_annotationtracks
+      - when: "{{ failed() }}"
+        publish:
+          - msg: "{{ result() }}"
+        do:
+          - report_failure 
+
+  make_annotationtracks:
+    action: st2_annotationtracks.annotationtracks
+    input:
+      clusteringdata: <% ctx(clusteringdata) %>
+    next:
+      - when: "{{ succeeded() }}"
+      - publish:
+          annnotationtracks: <% result().stdout %>
+      - do:
+          copy_into_gens_container
+      - when: "{{ failed() }}"
+        publish:
+          - msg: "{{ result() }}"
+        do:
+          - report_failure 
+
+
+  copy_into_gens_container:
+    action: st2_annotationtracks.copy_to_gens
+    input:
+      annotationtracks: <% ctx(annotationtracks) %> 
+    next:
+      - when: "{{ succeeded() }}"
+      - publish:
+          -msg: "Annotationtracks has been copied to the Gens container"
+      - do:
+          upload_to_gens
+      - when: "{{ failed() }}"
+        publish:
+          - msg: "{{ result() }}"
+        do:
+          - report_failure 
+
+  upload_to_gens:
+    action: st2_annotationtracks.upload_tracks_to_gens
+    input:
+      annotationtrackfile: basename <% ctx(annotationtracks) %>
+    next:
+      - when: "{{ succeeded() }}"
+      - publish:
+          -msg: "Annotationtracks has been uploaded to Gens"
+      - when: "{{ failed() }}"
+        publish:
+          - msg: "{{ result() }}"
+        do:
+          - report_failure 
+
+  report_failure:
+    action: core.noop

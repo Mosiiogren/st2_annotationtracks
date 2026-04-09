@@ -1,0 +1,30 @@
+name: update_annotationtracks_in_gens
+pack: st2_annotationtracks
+description: Workflow to create and update annotationtracks in Gens
+runner_type: orquesta
+entry_point: workflows/update_annotationtracks_in_gens.yaml
+enabled: true
+
+parameters:
+  hosts:
+    default: "localhost"
+  cwd:
+    type: string
+    description: Path to where the docker compose file is positioned
+    required: True
+  variants:
+    description: The filepath for the variants to be clustered
+    type: string
+    required: true
+  genedata:
+    description: The filepath for the gene data
+    type: string
+    required: true
+  MANEdata:
+    description: The filepath for the MANE status data
+    type: string
+    required: true
+  regulatorydata:
+    description: The filepath for the regulatory data
+    type: string
+    required: true

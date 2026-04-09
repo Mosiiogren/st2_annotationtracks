@@ -7,4 +7,4 @@ parameters:
   variantfile:
     type: string
     description: Path to where the variant data has been stored
-    default: "/data/dumps/annotationtracks.csv"
+    required: True

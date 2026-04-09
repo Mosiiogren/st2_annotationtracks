@@ -1,0 +1,16 @@
+name: upload_tracks_to_gens
+enabled: True
+description: Upload the annotation trackfiles to Gens
+runner_type: remote-shell-script
+entry_point: upload_tracks_to_gens.sh
+parameters:
+  annotationtrackfile:
+    type: object
+    description: CSV file containing the annotationtracks that is being uploaded to Gens
+    required: True
+    position: 0
+  gensfolder:
+    type: string
+    description: Path to the data folder in the Gens container
+    required: True
+    position: 1

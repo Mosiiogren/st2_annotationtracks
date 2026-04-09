@@ -143,9 +143,11 @@ get_regulatory_data:
           - report_failure 
 
   upload_to_gens:
-    action: st2_annotationtracks.upload_tracks_to_gens
+    action: core.remote
     input:
-      annotationtrackfile: basename <% ctx(annotationtracks) %>
+      hosts: <% ctx().hosts %>
+      cwd: <% ctx().cwd %>
+      cmd: docker -f docker-compose.yaml cp <% ctx(annotationtracks) %> gens:<% ctx().gensfolder %>
     next:
       - when: "{{ succeeded() }}"
       - publish:

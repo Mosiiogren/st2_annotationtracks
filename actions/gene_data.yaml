@@ -1,0 +1,10 @@
+name: gene_data
+enabled: True
+description: Retrieve and filter gene data
+runner_type: python-script
+entry_point: gene_data.py
+parameters:
+  genefile:
+    type: string
+    description: Path to where the gene data has been stored
+    required: True

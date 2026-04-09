@@ -10,6 +10,7 @@ input:
 
 vars:
   - host:
+  - cwd:
   - variantfilename:
   - variantfile:
   - variantdata:
@@ -25,6 +26,8 @@ tasks:
   open_variant_file:
     action: core.remote
     input: 
+      hosts: <% ctx().hosts %>
+      cwd: <% ctx().cwd %>
       cmd: head -1 <% ctx().variantfilename %>
     next:
       - when: "{{ succeeded() }}"

@@ -7,5 +7,5 @@ class VariantData (Action):
         print ("Helloooooo")
 
         df = pd.read_json(variantfile)
-        print (df.head))
+        print (df.head())
         return True, "It is Working!!!"

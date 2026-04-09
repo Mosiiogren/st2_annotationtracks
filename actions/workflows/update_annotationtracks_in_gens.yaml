@@ -61,14 +61,14 @@ get_regulatory_data:
       - publish:
           regulatorydata: <% result().stdout %>
       - do:
-          clustering
+          make_clustering
       - when: "{{ failed() }}"
         publish:
           - msg: "{{ result() }}"
         do:
           - report_failure  
 
-  clustering:
+  make_clustering:
     action: st2_annotationtracks.clustering
     input:
       variantdata: <% ctx(variantdata) %>

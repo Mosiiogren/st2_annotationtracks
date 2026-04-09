@@ -9,3 +9,8 @@ parameters:
     description: CSV file containing the annotationtracks
     required: True
     position: 0
+  gensfolder:
+    type: string
+    description: Path to the data folder in the Gens container
+    required: True
+    position: 1

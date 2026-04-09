@@ -3,10 +3,10 @@ from st2common.runners.base_action import Action
 
 class VariantData (Action):
 
-    def run (self, variantfile):
+    def run (self, variantfile, MANEfile):
         print ("Hello from gene_data")
 
-        df = pd.read_csv(
+        df_gene = pd.read_csv(
           genefile,
           sep = "\t",
           header=None,
@@ -14,6 +14,16 @@ class VariantData (Action):
           dtype = str
         )
 
+        print (df_gene.head)
+
+        df_MANE = pd.read_csv(
+          MANEfile,
+          sep = "\t",
+          na_values="\\N"
+          dtype = str
+        )
+
           
-        print (df.head)
+        print (df_MANE.head)
+        
         return True, "Gene data is working!!!"

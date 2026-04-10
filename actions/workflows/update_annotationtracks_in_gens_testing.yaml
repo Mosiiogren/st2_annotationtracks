@@ -4,7 +4,7 @@ description: Workflow to create annotationtracks and update the existing annotat
 input:
   - hosts
   - cwd
-  - variantfilename:
+  - variantfilename
 
 vars:
   - hosts:

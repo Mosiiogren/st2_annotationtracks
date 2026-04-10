@@ -7,11 +7,15 @@ enabled: true
 
 parameters:
   hosts:
-    default: "localhost"
+    description: The server the command is running at
+    type: string
+    required: True
   cwd:
     description: Path to the folder containing the variants
+    type: string
     required: True
   variantfilename:
     description: The filename of the file containing the variants
+    type: string
     required: true
   

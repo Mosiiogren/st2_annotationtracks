@@ -19,4 +19,13 @@ tasks:
       - when: "{{ succeeded() }}"
         publish:
           - variantfile: <% result().stdout
+      - do:
+          get_variant_data
+
+  get_variant_data:
+    action: st2_annotationtracks.variant_data
+    input:
+      variantfile: <% ctx().variantfile %> 
+   
       
+

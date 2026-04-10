@@ -10,7 +10,6 @@ vars:
   - hosts:
   - cwd:
   - variantfile:
-  - variantdata:
 
 tasks:
   open_variant_file:
@@ -18,5 +17,8 @@ tasks:
     input: 
       hosts: <% ctx().hosts %>
       cwd: <% ctx().cwd %>
-      cmd: "echo jq \"[. | {variant_type: .variant_type, institute: .institute, category: .category, start: .position, end: .end, length: .length, chromosome: .chromosome, end_chromosome: .end_chrom,  sub_category: .sub_category} | select(.category == \"snv\")]\" <% ctx().variantfilename %>"
-   
+      cmd: "jq \". | {variant_type: .variant_type, institute: .institute, category: .category, start: .position, end: .end, length: .length, chromosome: .chromosome, end_chromosome: .end_chrom,  sub_category: .sub_category} |select(.start==76149560)\" <% ctx().variantfilename %>"
+   next:
+      - when: "{{ succeeded() }}"
+        publish:
+          variantfile: <% result().stdout 

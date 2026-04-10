@@ -1,0 +1,19 @@
+name: update_annotationtracks_in_gens_testing
+pack: st2_annotationtracks
+description: Workflow to create and update annotationtracks in Gens
+runner_type: orquesta
+entry_point: workflows/update_annotationtracks_in_gens_testing.yaml
+enabled: true
+
+parameters:
+  hosts:
+    default: "localhost"
+  cwd:
+    type: string
+    description: Path to the folder containing the variants
+    required: True
+  variantfilename:
+    description: The filename of the file containing the variants
+    type: string
+    required: true
+  

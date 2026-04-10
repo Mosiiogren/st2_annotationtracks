@@ -2,11 +2,11 @@
 
 ref: st2_annotationtracks
 name: st2_annotationtracks
-description: Pack for retrieving variant data, clustering the data, and creating annotation trackfiles thta is then uploaded to Gens
+description: Pack for retrieving variant data, clustering the data, and creating annotation trackfiles that is then uploaded to Gens
 keywords:
   - python3
 version: 0.0.1
 python_version:
  - "3"
 author: Moa
-email: Moa.ogren@internet.com
+email: Moa.ogren@tegnet.se

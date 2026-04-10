@@ -6,5 +6,6 @@ entry_point: variant_data.py
 parameters:
   variantfile:
     description: Variable containing the variants that should be further filtered
+    type: object
     required: True
     position: 0

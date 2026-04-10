@@ -5,7 +5,7 @@ runner_type: python-script
 entry_point: variant_data.py
 parameters:
   variantfile:
-    type: string
-    description: Filename of the file where the variant data has been stored
+    type: object
+    description: Variable containing the variants that should be further filtered
     required: True
     position: 0

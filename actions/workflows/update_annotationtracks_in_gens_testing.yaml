@@ -21,4 +21,12 @@ tasks:
    next:
     - when: "{{ succeeded() }}"
       publish:
-        - variantfile: <% result().stdout 
+        - variantfile: <% result().stdout
+    - when: "{{ failed() }}"
+      publish:
+        - msg: "{{ result() }}"
+      do:
+        - report_failure
+
+   report_failure:
+    action: core.noop

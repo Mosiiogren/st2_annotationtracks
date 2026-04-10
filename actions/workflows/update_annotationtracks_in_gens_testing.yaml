@@ -22,7 +22,7 @@ tasks:
     next:
       - when: "{{ succeeded() }}"
       - publish:
-          variantfile: <% result().stdout %>
+          variantfile: <% result()[hosts]["stdout"] %>
       - do:
           get_variant_data
       - when: "{{ failed() }}"

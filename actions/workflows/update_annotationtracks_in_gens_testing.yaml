@@ -4,14 +4,11 @@ description: Workflow to create annotationtracks and update the existing annotat
 input:
   - hosts
   - cwd
-  - genedata
-  - MANEdata
-  - regulatorydata
+  - variantfilename:
 
 vars:
   - hosts:
   - cwd:
-  - variantfilename:
   - variantfile:
   - variantdata:
 
@@ -21,7 +18,7 @@ tasks:
     input: 
       hosts: <% ctx().hosts %>
       cwd: <% ctx().cwd %>
-      cmd: head -1 <% ctx().variantfilename %>
+      cmd: jq ". | {variant_type: .variant_type, institute: .institute, category: .category, start: .position, end: .end, length: .length, chromosome: .chromosome, end_chromosome: .end_chrom,  sub_category: .sub_category} | select(.category == \"sv\"), select(.category == \"cancer_sv\")" <% ctx().variantfilename %>
     next:
       - when: "{{ succeeded() }}"
       - publish:

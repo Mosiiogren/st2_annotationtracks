@@ -9,11 +9,9 @@ parameters:
   hosts:
     default: "localhost"
   cwd:
-    type: string
     description: Path to the folder containing the variants
     required: True
   variantfilename:
     description: The filename of the file containing the variants
-    type: string
     required: true
   

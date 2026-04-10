@@ -7,10 +7,6 @@ input:
   - cwd
   - variantfilename
 
-vars:
-  - hosts:
-  - cwd:
-  - variantfile:
 
 tasks:
   open_variant_file:

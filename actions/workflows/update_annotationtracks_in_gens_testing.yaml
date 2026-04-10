@@ -21,8 +21,8 @@ tasks:
       cmd: "jq \"[. | {variant_type: .variant_type, institute: .institute, category: .category, start: .position, end: .end, length: .length, chromosome: .chromosome, end_chromosome: .end_chrom,  sub_category: .sub_category} | select(.category == \"snv\")]\" <% ctx().variantfilename %>"
     next:
       - when: "{{ succeeded() }}"
-      - publish:
-          variantfile: <% result()[hosts]["stdout"] %>
+        publish:
+          variantfile: <% result().stdout %>
       - do:
           get_variant_data
       - when: "{{ failed() }}"

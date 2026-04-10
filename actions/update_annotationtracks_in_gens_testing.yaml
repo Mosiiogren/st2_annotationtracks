@@ -8,7 +8,6 @@ enabled: true
 parameters:
   hosts:
     description: The server the command is running at
-    type: string
     required: True
   cwd:
     description: Path to the folder containing the variants

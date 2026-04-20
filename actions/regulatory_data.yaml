@@ -4,8 +4,13 @@ description: Retrieve and filter regulatory data
 runner_type: python-script
 entry_point: regulatory_data.py
 parameters:
-  regulatoryfile:
+  regulatoryfileurl:
     type: string
-    description: Path to where the regulatory data has been stored
-    required: True
+    description: Link to the regulatory data at Ensemble, information seen at https://ftp.ensembl.org/pub/release-113/regulation/homo_sapiens/README.md
+    default: "https://ftp.ensembl.org/pub/release-113/regulation/homo_sapiens/GRCh38/annotation/Homo_sapiens.GRCh38.regulatory_features.v113.gff3.gz"
     position: 0
+  outputfileregulatory:
+    type: string
+    description: Path to where the filtered regulatory data should be stored
+    default: "/storage/refrencedata/regulatorydata.json"
+    position: 1

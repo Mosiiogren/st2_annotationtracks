@@ -132,7 +132,7 @@ tasks:
           - report_finished
       - when: "{{ failed() }}"
         publish:
-          - msg: <% result().stderr %>
+          - msg: <% result().result %>
         do:
           - report_failure
   

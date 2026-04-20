@@ -7,24 +7,31 @@ enabled: true
 
 parameters:
   hosts:
-    default: "localhost"
-  cwd:
+    description: The server the command is running at
     type: string
-    description: Path to where the docker compose file is positioned
     required: True
-  variants:
-    description: The filepath for the variants to be clustered
+  cwd:
+    description: Path to the folder containing the variants
+    type: string
+    required: True
+  variantfilename:
+    description: The filepath to the file containing the variants
     type: string
     required: true
-  genedata:
-    description: The filepath for the gene data
+  genefile:
+    description: Link to the gene data at Ensemble, information seen at https://ftp.ensembl.org/pub/release-113/gtf/homo_sapiens/README
     type: string
-    required: true
-  MANEdata:
-    description: The filepath for the MANE status data
+    default: "https://ftp.ensembl.org/pub/release-113/gtf/homo_sapiens/Homo_sapiens.GRCh38.113.gtf.gz"
+  MANEfile:
+    description: Link to the MANE data at Ensemble, information seen at https://ftp.ncbi.nlm.nih.gov/refseq/MANE/MANE_human/release_1.4/README.txt
     type: string
-    required: true
-  regulatorydata:
-    description: The filepath for the regulatory data
+    default: "https://ftp.ncbi.nlm.nih.gov/refseq/MANE/MANE_human/release_1.4/MANE.GRCh38.v1.4.summary.txt.gz"
+  regulatoryfile:
+    description: Link to the regulatory data at Ensemble, information seen at https://ftp.ensembl.org/pub/release-113/regulation/homo_sapiens/README.md
     type: string
-    required: true
+    default: "https://ftp.ensembl.org/pub/release-113/regulation/homo_sapiens/GRCh38/annotation/Homo_sapiens.GRCh38.regulatory_features.v113.gff3.gz"
+
+ 
+
+  
+  

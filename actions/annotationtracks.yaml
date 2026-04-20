@@ -5,7 +5,12 @@ runner_type: python-script
 entry_point: annotationtracks.py
 parameters:
   clusteringdata:
-    type: object
-    description: Dataframe containing clustered data
-    required: True
+    type: string
+    description: Path to where the clusters has been stored
+    default: "/storage/refrencedata/clusters.json"
     position: 0
+  outputfolder:
+    type: string
+    description: Path to where the annotationtracks should be stored
+    default: "/storage/annotationtracks/"
+    position: 1

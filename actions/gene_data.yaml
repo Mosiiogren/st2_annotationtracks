@@ -4,13 +4,23 @@ description: Retrieve and filter gene data
 runner_type: python-script
 entry_point: gene_data.py
 parameters:
-  genefile:
+  MANEfileurl:
     type: string
-    description: Path to where the gene data has been stored
-    required: True
+    description: Link to the MANE data at Ensemble, information seen at https://ftp.ncbi.nlm.nih.gov/refseq/MANE/MANE_human/release_1.4/README.txt
+    default: "https://ftp.ncbi.nlm.nih.gov/refseq/MANE/MANE_human/release_1.4/MANE.GRCh38.v1.4.summary.txt.gz"
     position: 0
-  MANEfile:
+  genefileurl:
     type: string
-    description: Path to where the MANE status data has been stored
-    required: True
+    description: Link to the gene data at Ensemble, information seen at https://ftp.ensembl.org/pub/release-113/gtf/homo_sapiens/README
+    default: "https://ftp.ensembl.org/pub/release-113/gtf/homo_sapiens/Homo_sapiens.GRCh38.113.gtf.gz"
     position: 1
+  outputfilegene:
+    type: string
+    description: Path to where the filtered gene data should be stored
+    default: "/storage/refrencedata/genedata.json"
+    position: 2
+  outputfileexon:
+    type: string
+    description: Path to where the filtered exon data should be stored
+    default: "/storage/refrencedata/exondata.json"
+    position: 3

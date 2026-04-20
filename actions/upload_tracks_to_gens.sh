@@ -2,9 +2,15 @@
 
 set -e
 
-ANNOTATIONTRACKSFILE=$1
-GENSFOLDER=$2
+ANNOTATIONTRACKS=$1
+OUTPUTFOLDER=$2
 
-docker compose -f docker-compose.yaml exec gens gens load annotations -b 38 -f ${GENSFOLDER}/${ANNOTATIONTRACKSFILE}
 
-echo "Uploading to Gens is Working"
+IFS="," read -a array <<< "${ANNOTATIONTRACKS}"
+
+for file in "${array[@]}"
+do
+    echo "Copying $file to Gens container"
+    docker compose -f docker-compose.yaml cp "${OUTPUTFOLDER}$file" gens:/data/wgs/annotationtracks/
+    
+done

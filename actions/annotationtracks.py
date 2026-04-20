@@ -1,3 +1,4 @@
+import datetime
 import pandas as pd
 import numpy as np
 
@@ -61,8 +62,8 @@ class Annotationtracks (Action):
     def addcomments (self, df: pd.DataFrame) -> pd.DataFrame:
         
         df["comments"] = np.where((df["chromosome"] == df["chromosomeEND"]), 
-                    "SCORE: " + df["score"].astype(str) + ";" + "SV TYPE: " + df["Name"].astype(str),
-                    "SCORE: " + df["score"].astype(str) + ";" + "SV TYPE: " + df["Name"].astype(str) + ";" + "Start Chromosome: " + df["chromosome"].astype(str) + ":" + df["start"].astype(str) + ";" + "End chromosome: " + df["chromosomeEND"] + ":" + df["end"].astype(str)
+                    "SCORE: " + df["score"].astype(str) + ";" + "SV TYPE: " + df["Name"].astype(str) + ";" + "Track created at: " + datetime.datetime.now().strftime("%c"),
+                    "SCORE: " + df["score"].astype(str) + ";" + "SV TYPE: " + df["Name"].astype(str) + ";" + "Start Chromosome: " + df["chromosome"].astype(str) + ":" + df["start"].astype(str) + ";" + "End chromosome: " + df["chromosomeEND"] + ":" + df["end"].astype(str) + ";" + "Track created at: " + datetime.datetime.now().strftime("%c")
                     )
         
         return df

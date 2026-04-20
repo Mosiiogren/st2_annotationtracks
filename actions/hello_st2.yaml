@@ -1,6 +1,0 @@
-
-name: hello_st2
-enabled: True
-description: Say Hello to StackStorm
-runner_type: python-script
-entry_point: hello_st2.py

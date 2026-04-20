@@ -4,19 +4,29 @@ description: Cluster the given variants based on similarity and functions
 runner_type: python-script
 entry_point: clustering.py
 parameters:
-  variantdata:
-    type: object
-    description: Dataframe containing variant data
+  variantfile:
+    type: array
+    description: JSON array containing variant data
     required: True
     position: 0
   genedata:
-    type: object
-    description: Dataframe containing gene data
-    required: True
+    type: string
+    description: Path to the stored gene data
+    default: "/storage/refrencedata/genedata.json"
     position: 1
   regulatorydata:
-    type: object
-    description: Dataframe containing regulatorydata
-    required: True
+    type: string
+    description: Path to where the regulatory data has been stored
+    default: "/storage/refrencedata/regulatorydata.json"
     position: 2
+  exondata:
+    type: string
+    description: Path to where the exon data has been stored
+    default: "/storage/refrencedata/exondata.json"
+    position: 3
+  outputfileclusters:
+    type: string
+    description: Path to where the clusters should be stored
+    default: "/storage/refrencedata/clusters.json"
+    position: 4
   

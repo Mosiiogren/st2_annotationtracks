@@ -1,0 +1,28 @@
+name: timer
+pack: st2_annotationtracks
+description: Set timer to update annotationtracks every friday at 20 (UTC time, summer=18, winter=19)
+enabled: true
+
+trigger:
+  type: "core.st2.CronTimer"
+  parameters:
+      timezone: "UTC"
+      day_of_week: "fri"
+      hour: "18"
+      minute: "0"
+      second: "0"
+
+criteria: {}
+
+action:
+  ref: st2_annotationtracks.update_annotationtracks_in_gens
+  parameters:
+    hosts: vs1909
+    cwd: /scouttest/
+    variantfilename: data/dumps/annotationtracks.json
+
+
+
+
+
+

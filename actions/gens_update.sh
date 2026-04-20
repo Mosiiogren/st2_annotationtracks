@@ -2,13 +2,21 @@
 
 set -e
 
-DOCKERCOMMAND=$1
-MONGOCOMMAND=$2
-INPUTFIRST=$3
-INPUTSECOND=$4
 
-docker compose -f docker-compose.yaml ${DOCKERCOMMAND}
-#docker compose -f docker-compose.yaml ${DOCKERCOMMAND} --username=${INPUTFIRST} --password=${INPUTSECOND} ${MONGOCOMMAND}
+ANNOTATIONTRACKS=$1
 
-echo "Working #"
+
+
+IFS="," read -a array <<< "${ANNOTATIONTRACKS}"
+
+for file in "${array[@]}"
+do
+    echo "Uploading $file to Gens"
+    docker compose -f docker-compose.yaml exec gens gens load annotations -b 38 -f /data/wgs/annotationtracks/$file
+    
+done
+
+
+
+
 

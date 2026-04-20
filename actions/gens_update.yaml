@@ -1,37 +1,23 @@
 
 name: gens_update
 enabled: True
-description: Docker commando for Gens
+description: Upload annotationtracks to Gens
 runner_type: remote-shell-script
 entry_point: gens_update.sh
 parameters:
   hosts:
-    default: "localhost"
+    type: string
+    description: Host to where the Gens docker has been started at
+    required: True
   cwd:
     type: string
-    description: Path to where the docker compose file is positioned
+    description: Path to where the Gens docker compose file is positioned
     required: True
-  dockercommand:
-    type: string
-    description: Docker command to be executed
-    default: "logs"
+  annnotationtracks:
+    type: array
+    description: List containing the annotationtrackfiles that is being uploaded to Gens
     position: 0
-  mongocommand:
-    type: string
-    description: Mongo command to be executed
-    default: "show dbs"
-    required: false
-    position: 1
-  inputfirst:
-    type: string
-    description: Input
-    required: false
-    position: 2
-  inputsecond:
-    type: string
-    description: Input
-    required: false
-    position: 3
+
 
     
     

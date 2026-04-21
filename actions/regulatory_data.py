@@ -14,9 +14,8 @@ from st2common.runners.base_action import Action
 
 class RegulatoryData (Action):
 
-    def run (self, regulatoryfileurl, outputfileregulatory):
+    def run (self, regulatoryfileurl, outputfileregulatory) -> tuple[bool, str]:
 
-        # Check if file already exists
         if (Path(outputfileregulatory).exists()):
           return (True, "Regulator file already exists!")
 
@@ -29,7 +28,9 @@ class RegulatoryData (Action):
     
 
     def getdata (self, url:str) -> pd.DataFrame:
-
+        """
+          Function for retrieving data from request
+        """
         response = requests.get(url)
         response = decompress(response.content)
 
@@ -40,8 +41,6 @@ class RegulatoryData (Action):
                 comment="#",
                 dtype = str
               )
-
-        # Check if the column names has changed
 
         df.columns = columns = ["chromosome", "source", "Type", "start", "end", "col6", "col7", "col8", "col9"]
         df = self.getattributes (df=df,
@@ -65,8 +64,10 @@ class RegulatoryData (Action):
         return df
 
     def filterREGULATORYdata (self, df:pd.DataFrame) -> pd.DataFrame:
-
-        df["chromosome"] = df["chromosome"].astype("string")
+        """
+            Function for filtering the data into the correct format
+        """
+        
         df["start"] = df["start"].astype("int")
         df["end"] = df["end"].astype("int")
 

@@ -5,7 +5,6 @@ set -e
 ANNOTATIONTRACKS=$1
 OUTPUTFOLDER=$2
 
-
 IFS="," read -a array <<< "${ANNOTATIONTRACKS}"
 
 for file in "${array[@]}"

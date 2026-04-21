@@ -2,10 +2,7 @@
 
 set -e
 
-
 ANNOTATIONTRACKS=$1
-
-
 
 IFS="," read -a array <<< "${ANNOTATIONTRACKS}"
 

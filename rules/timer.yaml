@@ -12,8 +12,6 @@ trigger:
       minute: "0"
       second: "0"
 
-criteria: {}
-
 action:
   ref: st2_annotationtracks.update_annotationtracks_in_gens
   parameters:

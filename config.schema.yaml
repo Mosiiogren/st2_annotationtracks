@@ -1,0 +1,35 @@
+---
+hosts:
+  description: The server the command is running from 
+  type: string
+  required: True
+
+cwd:
+  description: Path to the folder containing the structural variants
+  type: string
+  required: True
+
+outputfileregulatory:
+  type: string
+  description: Path to where the filtered regulatory data should be stored
+  required: True
+
+outputfilegene:
+    type: string
+    description: Path to where the filtered gene data should be stored
+    required: True
+
+outputfileexon:
+    type: string
+    description: Path to where the filtered exon data should be stored
+    required: True
+
+outputfileclusters:
+    type: string
+    description: Path to where the clusters should be stored
+    required: True
+
+outputfolderannotationtracks:
+  type: string
+  description: Path to the folder where the annotationtracks are being stored
+  required: True

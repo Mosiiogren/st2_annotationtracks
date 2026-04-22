@@ -12,10 +12,12 @@ parameters:
     description: The server the command is running at
     type: string
     default: "{{ config_context.hosts }}"
+    immutable: True
   cwd:
     description: Path to the folder containing the variants
     type: string
     default: "{{ config_context.cwd }}"
+    immutable: True
   variantfilename:
     description: The filepath to the file containing the variants
     type: string

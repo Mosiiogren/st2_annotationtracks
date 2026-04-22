@@ -14,20 +14,24 @@ parameters:
     type: string
     description: Path to the stored gene data
     default: "{{ config_context.outputfilegene }}"
+    immutable: True
     position: 1
   regulatorydata:
     type: string
     description: Path to where the regulatory data has been stored
     default: "{{ config_context.outputfileregulatory }}"
+    immutable: True
     position: 2
   exondata:
     type: string
     description: Path to where the exon data has been stored
     default: "{{ config_context.outputfileexon }}"
+    immutable: True
     position: 3
   outputfileclusters:
     type: string
     description: Path to where the clusters should be stored
     default: "{{ config_context.outputfileclusters }}"
+    immutable: True
     position: 4
   

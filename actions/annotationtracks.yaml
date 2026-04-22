@@ -9,9 +9,11 @@ parameters:
     type: string
     description: Path to where the clusters has been stored
     default: "{{ config_context.outputfileclusters }}"
+    immutable: True
     position: 0
   outputfolder:
     type: string
     description: Path to where the annotationtracks should be stored
     default: "{{ config_context.outputfolderannotationtracks }}"
+    immutable: True
     position: 1

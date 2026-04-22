@@ -19,9 +19,11 @@ parameters:
     type: string
     description: Path to where the filtered gene data should be stored
     default: "{{ config_context.outputfilegene }}"
+    immutable: True
     position: 2
   outputfileexon:
     type: string
     description: Path to where the filtered exon data should be stored
     default: "{{ config_context.outputfileexon }}"
+    immutable: True
     position: 3

@@ -103,8 +103,6 @@ tasks:
   copy_into_gens_container:
     action: st2_annotationtracks.upload_tracks_to_gens
     input:
-      hosts: <% ctx().hosts %>
-      cwd: <% ctx().cwd %>
       annnotationtracks: <% ctx().annnotationtracks %>
     next:
       - when: "{{ succeeded() }}"
@@ -121,8 +119,6 @@ tasks:
   upload_into_gens:
     action: st2_annotationtracks.gens_update
     input:
-      hosts: <% ctx().hosts %>
-      cwd: <% ctx().cwd %>
       annnotationtracks: <% ctx().annnotationtracks %>
     next:
       - when: "{{ succeeded() }}"

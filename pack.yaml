@@ -1,5 +1,4 @@
-
-
+---
 ref: st2_annotationtracks
 name: st2_annotationtracks
 description: Pack for retrieving variant data, clustering the data, and creating annotation trackfiles that is then uploaded to Gens

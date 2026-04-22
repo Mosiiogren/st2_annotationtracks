@@ -1,3 +1,4 @@
+---
 name: gene_data
 enabled: True
 description: Retrieve and filter gene data
@@ -17,10 +18,10 @@ parameters:
   outputfilegene:
     type: string
     description: Path to where the filtered gene data should be stored
-    default: "/storage/refrencedata/genedata.json"
+    default: "{{ config_context.outputfilegene }}"
     position: 2
   outputfileexon:
     type: string
     description: Path to where the filtered exon data should be stored
-    default: "/storage/refrencedata/exondata.json"
+    default: "{{ config_context.outputfileexon }}"
     position: 3

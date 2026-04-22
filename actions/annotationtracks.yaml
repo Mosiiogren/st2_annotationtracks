@@ -1,3 +1,4 @@
+---
 name: annotationtracks
 enabled: True
 description: Creates annotation trackfiles from the clustereddata
@@ -7,10 +8,10 @@ parameters:
   clusteringdata:
     type: string
     description: Path to where the clusters has been stored
-    default: "/storage/refrencedata/clusters.json"
+    default: "{{ config_context.outputfileclusters }}"
     position: 0
   outputfolder:
     type: string
     description: Path to where the annotationtracks should be stored
-    default: "/storage/annotationtracks/"
+    default: "{{ config_context.outputfolderannotationtracks }}"
     position: 1

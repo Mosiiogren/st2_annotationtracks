@@ -1,4 +1,4 @@
-
+---
 name: gens_update
 enabled: True
 description: Upload annotationtracks to Gens
@@ -6,13 +6,13 @@ runner_type: remote-shell-script
 entry_point: gens_update.sh
 parameters:
   hosts:
+    description: The server the command is running at
     type: string
-    description: Host to where the Gens docker has been started at
-    required: True
+    default: "{{ config_context.hosts }}"
   cwd:
+    description: Path to the folder containing the variants
     type: string
-    description: Path to where the Gens docker compose file is positioned
-    required: True
+    default: "{{ config_context.cwd }}"
   annnotationtracks:
     type: array
     description: List containing the annotationtrackfiles that is being uploaded to Gens

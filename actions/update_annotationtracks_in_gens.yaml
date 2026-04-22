@@ -1,3 +1,4 @@
+---
 name: update_annotationtracks_in_gens
 pack: st2_annotationtracks
 description: Workflow to create and update annotationtracks in Gens
@@ -5,19 +6,20 @@ runner_type: orquesta
 entry_point: workflows/update_annotationtracks_in_gens.yaml
 enabled: true
 
+
 parameters:
   hosts:
     description: The server the command is running at
     type: string
-    required: True
+    default: "{{ config_context.hosts }}"
   cwd:
     description: Path to the folder containing the variants
     type: string
-    required: True
+    default: "{{ config_context.cwd }}"
   variantfilename:
     description: The filepath to the file containing the variants
     type: string
-    required: true
+    default: "data/dumps/annotationtracks.json"
   genefile:
     description: Link to the gene data at Ensemble, information seen at https://ftp.ensembl.org/pub/release-113/gtf/homo_sapiens/README
     type: string

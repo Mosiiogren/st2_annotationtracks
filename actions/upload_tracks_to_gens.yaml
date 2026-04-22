@@ -1,3 +1,4 @@
+---
 name: upload_tracks_to_gens
 enabled: True
 description: Upload the annotation trackfiles to Gens
@@ -5,11 +6,13 @@ runner_type: remote-shell-script
 entry_point: upload_tracks_to_gens.sh
 parameters:
   hosts:
-    default: "localhost"
-  cwd:
+    description: The server the command is running at
     type: string
-    description: Path to where the docker compose file is positioned
-    required: True
+    default: "{{ config_context.hosts }}"
+  cwd:
+    description: Path to the folder containing the variants
+    type: string
+    default: "{{ config_context.cwd }}"
   annnotationtracks:
     type: array
     description: List containing the annotationtracks that is being uploaded to Gens
@@ -17,7 +20,7 @@ parameters:
     position: 0
   outputfolder:
     type: string
-    description: Path to where the annotationtracks should be stored
-    default: "/storage/annotationtracks/"
+    description: Path to the folder where the annotationtracks are being stored
+    default: "{{ config_context.outputfolderannotationtracks }}"
     position: 1
 

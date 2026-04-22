@@ -1,3 +1,4 @@
+---
 name: regulatory_data
 enabled: True
 description: Retrieve and filter regulatory data
@@ -12,5 +13,5 @@ parameters:
   outputfileregulatory:
     type: string
     description: Path to where the filtered regulatory data should be stored
-    default: "/storage/refrencedata/regulatorydata.json"
+    default: "{{ config_context.outputfileregulatory }}"
     position: 1

@@ -19,19 +19,28 @@ class RegulatoryData(Action):
         if Path(outputfileregulatory).exists():
             return (True, "Regulator file already exists!")
 
-        df = self.get_data(regulatoryfileurl)
-        df = self.filter_regulatoryfactor_data(df)
+        succeded, results = self.get_data(regulatoryfileurl)
+        if not succeded:
+            return (False, results)
+        df = self.filter_regulatoryfactor_data(results)
 
         df.to_json(outputfileregulatory, orient="records")
 
         return (True, f"Saved regulatory data to {outputfileregulatory}")
 
-    def get_data(self, url: str) -> pd.DataFrame:
+    def get_data(self, url: str) -> tuple[bool, pd.DataFrame | str]:
         """
         Function for retrieving data from request
         """
-        response = requests.get(url)
-        response = decompress(response.content)
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            try:
+                response = decompress(response.content)
+            except:
+                return (False, f"File {url} is not a gzip-compressed file")
+        except:
+            return (False, f"Problem with request from {url}")
 
         df = pd.read_csv(
             io.StringIO(response.decode()),
@@ -56,7 +65,7 @@ class RegulatoryData(Action):
             df=df, attributes=["ID", "gene_id"], last_column="col9"
         )
 
-        return df
+        return (True, df)
 
     def get_attributes(
         self, df: pd.DataFrame, attributes: list[str], last_column: str

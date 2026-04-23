@@ -25,9 +25,15 @@ class GeneData(Action):
         if (Path(outputfilegene).exists()) & (Path(outputfileexon).exists()):
             return (True, "Gene file and Exon file already exists!")
 
-        df_MANE_data, df_ENSEMBL_data = self.get_data(MANEfileurl, genefileurl)
-        df_MANE_data = self.filter_MANE_data(df_MANE_data)
-        df_ENSEMBL_data = self.filter_gene_data(df_ENSEMBL_data)
+        succeded, results = self.get_MANE_data(MANEfileurl)
+        if not succeded:
+            return (False, results)
+        df_MANE_data = self.filter_MANE_data(results)
+
+        succeded, results = self.get_gene_data(genefileurl)
+        if not succeded:
+            return (False, results)
+        df_ENSEMBL_data = self.filter_gene_data(results)
 
         df_ENSEMBL_genes = df_ENSEMBL_data[(df_ENSEMBL_data["feature"] == "gene")]
         df_transcripts = df_ENSEMBL_data[(df_ENSEMBL_data["feature"] == "transcript")]
@@ -49,37 +55,54 @@ class GeneData(Action):
             f"Saved gene data to {outputfilegene} and exon data to {outputfileexon}",
         )
 
-    def get_data(self, MANEurl: str, geneurl: str) -> tuple[pd.DataFrame, pd.DataFrame]:
+    def get_MANE_data(self, url: str) -> tuple[bool, pd.DataFrame | str]:
         """
-        Function for retrieving data from request
+        Function for retrieving MANE data from request
         """
-        response_MANE = self.get_response(MANEurl)
-        df_MANE = pd.read_csv(
-            io.StringIO(response_MANE.decode()), sep="\t", na_values="\\N", dtype=str
+        succeded, results = self.get_response(url)
+        if not succeded:
+            return False, results
+        df = pd.read_csv(
+            io.StringIO(results.decode()),
+            sep="\t",
+            na_values="\\N",
+            dtype=str,
         )
 
-        response_gene = self.get_response(geneurl)
-        df_gene = pd.read_csv(
-            io.StringIO(response_gene.decode()),
+        return True, df
+
+    def get_gene_data(self, url: str) -> tuple[bool, pd.DataFrame | str]:
+        """
+        Function for retrieving gene data from request
+        """
+
+        succeded, results = self.get_response(url)
+        if not succeded:
+            return False, results
+        df = pd.read_csv(
+            io.StringIO(results.decode()),
             sep="\t",
             header=None,
             comment="#",
             dtype=str,
         )
+        try:
+            df.columns = [
+                "seqname",
+                "source",
+                "feature",
+                "start",
+                "end",
+                "score",
+                "strand",
+                "frame",
+                "attribute",
+            ]
+        except:
+            return (False, f"Invalid columns for File {url}")
 
-        df_gene.columns = [
-            "seqname",
-            "source",
-            "feature",
-            "start",
-            "end",
-            "score",
-            "strand",
-            "frame",
-            "attribute",
-        ]
-        df_gene = self.get_attributes(
-            df=df_gene,
+        succeded, results = self.get_attributes(
+            df=df,
             attributes=[
                 "gene_id",
                 "gene_name",
@@ -91,38 +114,47 @@ class GeneData(Action):
             ],
             last_column="attribute",
         )
+        if not succeded:
+            return False, results
 
-        return df_MANE, df_gene
+        return True, results
 
-    def get_response(self, url: str) -> str:
+    def get_response(self, url: str) -> tuple[bool, str]:
         """
         Function for retrieving the response from a request
         """
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            try:
+                response = decompress(response.content)
+            except:
+                return (False, f"File {url} is not a gzip-compressed file")
+        except:
+            return (False, f"Problem with request from {url}")
 
-        response = requests.get(url)
-        response = decompress(response.content)
-
-        return response
+        return (True, response)
 
     def get_attributes(
         self, df: pd.DataFrame, attributes: list, last_column
-    ) -> pd.DataFrame:
+    ) -> tuple[bool, pd.DataFrame | str]:
         """
         Function for extracting key value data
         """
-
-        for attribute in attributes:
-            df[attribute] = df[last_column].apply(
-                lambda x: (
-                    re.findall(rf'{attribute} "([^"]*)"', x)[0]
-                    if rf'{attribute} "' in x
-                    else np.nan
+        try:
+            for attribute in attributes:
+                df[attribute] = df[last_column].apply(
+                    lambda x: (
+                        re.findall(rf'{attribute} "([^"]*)"', x)[0]
+                        if rf'{attribute} "' in x
+                        else np.nan
+                    )
                 )
-            )
-
+        except:
+            return (False, f"Invalid attribute list {attributes}")
         df = df.drop(last_column, axis=1)
 
-        return df
+        return True, df
 
     def filter_MANE_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """

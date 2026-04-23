@@ -1,7 +1,7 @@
 ---
 name: gene_data
 enabled: True
-description: Retrieve and filter gene data
+description: Retrieve and filter gene data based on MANE status
 runner_type: python-script
 entry_point: gene_data.py
 parameters:

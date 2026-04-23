@@ -14,7 +14,7 @@ parameters:
     default: "{{ config_context.hosts }}"
     immutable: True
   cwd:
-    description: Path to the folder containing the variants
+    description: Path to the folder containing the docker-compose file
     type: string
     default: "{{ config_context.cwd }}"
     immutable: True

@@ -162,7 +162,7 @@ class GeneData(Action):
         """
 
         # Filter the chromosome column -> Looks like: NC_000019.10 (We want 19)
-        df = df[df["GRCh38_chr"].str.contains("NT|NW") == False].copy()
+        df = df[df["GRCh38_chr"].str.contains("NC") == True].copy()
         df.loc[:, "GRCh38_chr"] = df["GRCh38_chr"].str.split(".").str[0]
         df.loc[:, "GRCh38_chr"] = df["GRCh38_chr"].str.split("_").str[1]
         # df["GRCh38_chr"] = df["GRCh38_chr"].astype("int").astype("str")

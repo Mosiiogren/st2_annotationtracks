@@ -18,7 +18,7 @@ parameters:
     position: 1
   columns:
     type: array
-    description: List of columns
+    description: List of columns in the dataframe
     default: ["chromosome","col2","Name","start","end","col6","col7","col8","col9"]
     position: 2
   attributes:

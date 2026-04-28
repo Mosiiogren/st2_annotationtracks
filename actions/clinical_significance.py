@@ -21,20 +21,24 @@ class ClinicalSignificance(Action):
         attributes: list,
     ) -> tuple[bool, str]:
 
-        filenames = []
+        finaldf = pd.DataFrame()
         for url in clinicalsignificancefileurl:
             succeded, results = self.get_data(url, columns, attributes)
             if not succeded:
                 return (False, results)
+            if results.empty:
+                continue
 
             df = self.filter_data(results, attributes)
             df = self.add_comments(df, attributes)
 
-            filename = self.createfilename(url, "tsv")
-            filenames.append(filename)
+            finaldf = pd.concat([finaldf, df])
 
-            self.create_annotationtrack_files(df, outputclinicalsignificance, filename)
-        return (True, filenames)
+        filename = self.create_annotationtrack_files(
+            finaldf, outputclinicalsignificance
+        )
+
+        return (True, filename)
 
     def get_data(
         self, url: str, columns: list, attributes: list
@@ -52,13 +56,20 @@ class ClinicalSignificance(Action):
         except:
             return (False, f"Problem with request from {url}")
 
-        df = pd.read_csv(
-            io.StringIO(response.decode()),
-            sep="\t",
-            header=None,
-            comment="#",
-            dtype=str,
-        )
+        # Check how many rows after comments are over, if zero then skip
+        try:
+            df = pd.read_csv(
+                io.StringIO(response.decode()),
+                sep="\t",
+                header=None,
+                comment="#",
+                dtype=str,
+            )
+        except pd.errors.EmptyDataError:
+            # Return an empty dataframe
+            return (True, pd.DataFrame())
+        except:
+            return (False, f"Problem with creating dataframe of {url}")
 
         df.columns = columns
         df = self.get_attributes(
@@ -123,57 +134,48 @@ class ClinicalSignificance(Action):
         #     df["comments"].map(
         #         lambda lst: lst.append(attribute + df[attribute].astype(str) + ";")
         #     )
-        df["comments"] = "Clinical significance: " + df["clinical_int"].astype(
-            str
-        ) + ";" "SV TYPE: " + df["Name"].astype(str) + ";" + "Phenotype: " + df[
-            "phenotype"
-        ].astype(
-            str
-        ) + ";" + "Phenotype ID: " + df[
-            "phenotype_id"
-        ].astype(
-            str
-        ) + ";" + "Consequences: " + df[
-            "consequence"
-        ].astype(
-            str
-        ) + ";" + "Validated: " + df[
-            "validated"
-        ].astype(
-            str
-        ) + ";" + "Copy number: " + df[
-            "copy_number"
-        ].astype(
-            str
-        ) + ";" + "Outer and/or inner range of start position: " + df[
-            "Start_range"
-        ].astype(
-            str
-        ) + ";" + "Outer and/or inner range of end position: " + df[
-            "End_range"
-        ].astype(
-            str
-        ) + ";" + "Zygosity: " + df[
-            "zygosity"
-        ].astype(
-            str
-        ) + ";" + "Web link to the variant: " + df[
-            "Dbxref"
-        ].astype(
-            str
-        ) + ";" + "Track created at: " + datetime.datetime.now().strftime(
-            "%c"
+        df["comments"] = (
+            "Clinical significance: "
+            + df["clinical_int"].astype(str)
+            + ";"
+            + "SV TYPE: "
+            + df["Name"].astype(str)
+            + ";"
+            + "Phenotype: "
+            + df["phenotype"].astype(str)
+            + ";"
+            + "Phenotype ID: "
+            + df["phenotype_id"].astype(str)
+            + ";"
+            + "Consequences: "
+            + df["consequence"].astype(str)
+            + ";"
+            + "Validated: "
+            + df["validated"].astype(str)
+            + ";"
+            + "Copy number: "
+            + df["copy_number"].astype(str)
+            + ";"
+            + "Outer and/or inner range of start position: "
+            + df["Start_range"].astype(str)
+            + ";"
+            + "Outer and/or inner range of end position: "
+            + df["End_range"].astype(str)
+            + ";"
+            + "Zygosity: "
+            + df["zygosity"].astype(str)
+            + ";"
+            + "Web link to the variant: "
+            + df["Dbxref"].astype(str)
+            + ";"
+            + "Track created at: "
+            + datetime.datetime.now().strftime("%c")
         )
 
         return df
 
-    def createfilename(self, url: str, filetype: str):
-
-        filename = url.rsplit("/")[-1].rsplit("gvf")[0] + filetype
-        return filename
-
     def create_annotationtrack_files(
-        self, df: pd.DataFrame, outputfolder: str, filename: str
+        self, df: pd.DataFrame, outputfolder: str
     ) -> list[str]:
 
         df = df.drop(
@@ -188,14 +190,15 @@ class ClinicalSignificance(Action):
             axis=1,
         )
 
-        df["start"] = df["start"].astype(int)
-        df["end"] = df["end"].astype(int)
+        filename = "ClinicalSignificance"
 
         df.to_csv(
             (outputfolder + filename),
             sep="\t",
             index=False,
         )
+
+        return [filename]
 
 
 # https://ftp.ensembl.org/pub/release-113/variation/MaveDB/

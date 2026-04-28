@@ -13,7 +13,7 @@ from st2common.runners.base_action import Action
 COLOR = {
     "Triplosensitivity": "0, 100, 0",
     "Haploinsufficiency": "0, 0, 0",
-    "Both": "50, 250, 50",
+    "Triplosensitivity&Haploinsufficiency": "50, 250, 50",
     "Dosage sensitivity unlikely": "144, 238, 144",
     "Unknown": "100, 100, 150",
 }
@@ -123,7 +123,7 @@ class RegulatoryData(Action):
         """
         Function for adding a color to respectively SV type
         """
-        df["color"] = COLOR["Both"]
+        df["color"] = COLOR["Triplosensitivity&Haploinsufficiency"]
 
         df.loc[
             (
@@ -209,27 +209,3 @@ class RegulatoryData(Action):
         )
 
         return [filename]
-
-
-#
-
-#     df = pd.read_json(
-#         "/storage/refrencedata/clinicalsignificance.json", orient="records"
-#     )
-#     df = self.filter_data(df, attributes)
-#     df = self.add_comments(df, attributes)
-#     filenames = []
-#     filename = self.createfilename(clinicalsignificancefileurl, "tsv")
-#     filenames.append(filename)
-#     self.create_annotationtrack_files(df, outputclinicalsignificance, filename)
-
-#     return (True, filenames)
-
-# succeded, results = self.get_data(
-#     clinicalsignificancefileurl, columns, attributes
-# )
-# if not succeded:
-#     return (False, results)
-
-# df = self.filter_data(results, attributes)
-#  results.to_json(outputclinicalsignificance, orient="records")

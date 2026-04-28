@@ -1,7 +1,7 @@
 ---
 version: 1.0
 name: update_informative_tracks_gens
-description: Workflow to create informative (phenotype, ...) annotationtracks and update the existing annotationtracks in Gens
+description: Workflow to create informative (phenotype, dosage sensitivity ...) annotationtracks and update the existing annotationtracks in Gens
 
 input:
   - hosts
@@ -19,6 +19,15 @@ tasks:
       - when: "{{ succeeded() }}"
         publish:
           - annnotationtracks: <% result().result %>
+        do:
+          - get_dosage_sensitivity
+  
+  get_dosage_sensitivity:
+    action: st2_annotationtracks.dosage_sensitivity
+    next:
+      - when: "{{ succeeded() }}"
+        publish:
+          - annnotationtracks: <% ctx().annnotationtracks + result().result %>
         do:
           - copy_into_gens_container
     

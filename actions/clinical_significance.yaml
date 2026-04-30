@@ -5,12 +5,12 @@ description: Retrieve and filter clinical significance data
 runner_type: python-script
 entry_point: clinical_significance.py
 parameters:
-  clinicalsignificancefileurl:
+  urls:
     type: array
     description: Link to the clinical significance data at dbVar, information seen at https://ftp.ncbi.nlm.nih.gov/pub/dbVar/data/README.txt
     default: ["https://ftp.ncbi.nlm.nih.gov/pub/dbVar/data/Homo_sapiens/by_assembly/GRCh38/gvf/GRCh38.variant_call.clinical.benign_or_likely_benign.gvf.gz","https://ftp.ncbi.nlm.nih.gov/pub/dbVar/data/Homo_sapiens/by_assembly/GRCh38/gvf/GRCh38.variant_call.clinical.conflicting_or_other.gvf.gz","https://ftp.ncbi.nlm.nih.gov/pub/dbVar/data/Homo_sapiens/by_assembly/GRCh38/gvf/GRCh38.variant_call.clinical.pathogenic_or_likely_pathogenic.gvf.gz","https://ftp.ncbi.nlm.nih.gov/pub/dbVar/data/Homo_sapiens/by_assembly/GRCh38/gvf/GRCh38.variant_call.clinical.uncertain_significance.gvf.gz"]
     position: 0
-  outputclinicalsignificance:
+  outputfolder:
     type: string
     description: Path 
     default: "/storage/annotationtracks/"
@@ -26,3 +26,9 @@ parameters:
     description: List of attributes
     default: ["Start_range","End_range","Dbxref","copy_number","phenotype","phenotype_id","zygosity","consequence","validated","clinical_int"]
     position: 3
+  filename:
+    type: string
+    description: Path 
+    default: "ClinicalSignificance.tsv"
+    immutable: True
+    position: 4

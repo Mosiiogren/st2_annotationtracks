@@ -2,6 +2,7 @@ import re
 import io
 import requests
 import datetime
+import time
 
 import pandas as pd
 import numpy as np
@@ -15,28 +16,28 @@ class ClinicalSignificance(Action):
 
     def run(
         self,
-        clinicalsignificancefileurl: list,
-        outputclinicalsignificance: str,
-        columns: list,
-        attributes: list,
+        urls: list,
+        outputfolder: str,
+        columns: list[str],
+        attributes: list[str],
+        filename: str,
     ) -> tuple[bool, str]:
 
         finaldf = pd.DataFrame()
-        for url in clinicalsignificancefileurl:
+        for url in urls:
             succeded, results = self.get_data(url, columns, attributes)
             if not succeded:
                 return (False, results)
             if results.empty:
                 continue
 
-            df = self.filter_data(results, attributes)
-            df = self.add_comments(df, attributes)
-
+            df = self.filter_data(results)
             finaldf = pd.concat([finaldf, df])
 
-        filename = self.create_annotationtrack_files(
-            finaldf, outputclinicalsignificance
-        )
+            time.sleep(5)
+
+        finaldf = self.add_comments(finaldf, attributes)
+        filename = self.create_annotationtrack_files(finaldf, outputfolder, filename)
 
         return (True, filename)
 
@@ -66,7 +67,6 @@ class ClinicalSignificance(Action):
                 dtype=str,
             )
         except pd.errors.EmptyDataError:
-            # Return an empty dataframe
             return (True, pd.DataFrame())
         except:
             return (False, f"Problem with creating dataframe of {url}")
@@ -95,12 +95,14 @@ class ClinicalSignificance(Action):
                     else np.nan
                 )
             )
+            df[attribute] = df[attribute].astype("str")
+            df.loc[df[attribute].isna(), attribute] = "-"
 
         df.drop(last_column, axis=1, inplace=True)
 
         return df
 
-    def filter_data(self, df: pd.DataFrame, attributes: list) -> pd.DataFrame:
+    def filter_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Function for filtering the dataframe
         """
@@ -118,10 +120,6 @@ class ClinicalSignificance(Action):
         df.loc[df["chromosome"] == "23", "chromosome"] = "X"
         df.loc[df["chromosome"] == "24", "chromosome"] = "Y"
 
-        for attribute in attributes:
-            df[attribute] = df[attribute].astype("str")
-            df.loc[df[attribute].isna(), attribute] = "-"
-
         return df
 
     def add_comments(self, df: pd.DataFrame, attributes: list) -> pd.DataFrame:
@@ -134,39 +132,44 @@ class ClinicalSignificance(Action):
         #     df["comments"].map(
         #         lambda lst: lst.append(attribute + df[attribute].astype(str) + ";")
         #     )
+
+        df = df.astype(str)
+
         df["comments"] = (
-            "Clinical significance: "
-            + df["clinical_int"].astype(str)
+            "dbVar"
+            + ";"
+            + "Clinical significance: "
+            + df["clinical_int"]
             + ";"
             + "SV TYPE: "
-            + df["Name"].astype(str)
+            + df["Name"]
             + ";"
             + "Phenotype: "
-            + df["phenotype"].astype(str)
+            + df["phenotype"]
             + ";"
             + "Phenotype ID: "
-            + df["phenotype_id"].astype(str)
+            + df["phenotype_id"]
             + ";"
             + "Consequences: "
-            + df["consequence"].astype(str)
+            + df["consequence"]
             + ";"
             + "Validated: "
-            + df["validated"].astype(str)
+            + df["validated"]
             + ";"
             + "Copy number: "
-            + df["copy_number"].astype(str)
+            + df["copy_number"]
             + ";"
             + "Outer and/or inner range of start position: "
-            + df["Start_range"].astype(str)
+            + df["Start_range"]
             + ";"
             + "Outer and/or inner range of end position: "
-            + df["End_range"].astype(str)
+            + df["End_range"]
             + ";"
             + "Zygosity: "
-            + df["zygosity"].astype(str)
+            + df["zygosity"]
             + ";"
             + "Web link to the variant: "
-            + df["Dbxref"].astype(str)
+            + df["Dbxref"]
             + ";"
             + "Track created at: "
             + datetime.datetime.now().strftime("%c")
@@ -175,7 +178,7 @@ class ClinicalSignificance(Action):
         return df
 
     def create_annotationtrack_files(
-        self, df: pd.DataFrame, outputfolder: str
+        self, df: pd.DataFrame, outputfolder: str, filename: str
     ) -> list[str]:
 
         df = df.drop(
@@ -190,7 +193,8 @@ class ClinicalSignificance(Action):
             axis=1,
         )
 
-        filename = "ClinicalSignificance"
+        df["start"] = df["start"].astype("int")
+        df["end"] = df["end"].astype("int")
 
         df.to_csv(
             (outputfolder + filename),

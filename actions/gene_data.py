@@ -22,9 +22,6 @@ class GeneData(Action):
         outputfileexon: str,
     ) -> tuple[bool, str]:
 
-        if (Path(outputfilegene).exists()) & (Path(outputfileexon).exists()):
-            return (True, "Gene file and Exon file already exists!")
-
         succeded, results = self.get_MANE_data(MANEfileurl)
         if not succeded:
             return (False, results)

@@ -6,9 +6,9 @@ runner_type: python-script
 entry_point: regulatory_data.py
 parameters:
   regulatoryfileurl:
-    type: string
+    type: array
     description: Link to the regulatory data at Ensemble, information seen at https://ftp.ensembl.org/pub/release-113/regulation/homo_sapiens/README.md
-    default: "https://ftp.ensembl.org/pub/release-113/regulation/homo_sapiens/GRCh38/annotation/Homo_sapiens.GRCh38.regulatory_features.v113.gff3.gz"
+    default: [https://ftp.ensembl.org/pub/release-115/regulation/homo_sapiens/GRCh38/annotation/Homo_sapiens.GRCh38.EMARs.v115.gff.gz,"https://ftp.ensembl.org/pub/release-115/regulation/homo_sapiens/GRCh38/annotation/Homo_sapiens.GRCh38.regulatory_features.v115.gff3.gz"]
     position: 0
   outputfileregulatory:
     type: string
@@ -16,3 +16,28 @@ parameters:
     default: "{{ config_context.outputfileregulatory }}"
     immutable: True
     position: 1
+  outputfileregulatorytracks:
+    type: string
+    description: Path to where the filtered regulatory data should be stored
+    default: "/storage/annotationtracks/"
+    immutable: True
+    position: 2
+  columns:
+    type: array
+    description: List of columns in the dataframe
+    default: ["chromosome","source","Type","start","end","col6","col7","col8","col9"]
+    position: 3
+  attributes:
+    type: array
+    description: List of attributes
+    default: ["ID","extended_start","extended_end","gene_id","gene_name","gene_biotype"]
+    position: 4
+  filename:
+    type: string
+    description: Filename
+    default: "regulatorydata.tsv"
+    immutable: True
+    position: 5
+
+
+    

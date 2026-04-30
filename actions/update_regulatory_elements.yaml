@@ -1,0 +1,36 @@
+---
+name: update_regulatory_elements
+pack: st2_annotationtracks
+description: Workflow to create and update Regulatory elements for clustering and for updates to Gens
+runner_type: orquesta
+entry_point: workflows/update_regulatory_elements.yaml
+enabled: true
+
+
+parameters:
+  hosts:
+    description: The server the command is running at
+    type: string
+    default: "{{ config_context.hosts }}"
+    immutable: True
+  cwd:
+    description: Path to the folder containing the docker-compose file
+    type: string
+    default: "{{ config_context.cwd }}"
+    immutable: True
+  genefile:
+    description: Link to the gene data at Ensemble, information seen at https://ftp.ensembl.org/pub/release-113/gtf/homo_sapiens/README
+    type: string
+    default: "https://ftp.ensembl.org/pub/release-113/gtf/homo_sapiens/Homo_sapiens.GRCh38.113.gtf.gz"
+  MANEfile:
+    description: Link to the MANE data at Ensemble, information seen at https://ftp.ncbi.nlm.nih.gov/refseq/MANE/MANE_human/release_1.4/README.txt
+    type: string
+    default: "https://ftp.ncbi.nlm.nih.gov/refseq/MANE/MANE_human/release_1.4/MANE.GRCh38.v1.4.summary.txt.gz"
+  regulatoryfile:
+    description: Link to the regulatory data at Ensemble, information seen at https://ftp.ensembl.org/pub/release-113/regulation/homo_sapiens/README.md
+    type: string
+    default: "https://ftp.ensembl.org/pub/release-113/regulation/homo_sapiens/GRCh38/annotation/Homo_sapiens.GRCh38.regulatory_features.v113.gff3.gz"
+
+ 
+  
+  

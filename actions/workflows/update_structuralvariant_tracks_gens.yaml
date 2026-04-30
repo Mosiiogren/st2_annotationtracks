@@ -3,13 +3,11 @@ version: 1.0
 name: update_structuralvariant_tracks_gens
 description: Workflow to create annotationtracks and update the existing annotationtracks in Gens
 
+
 input:
   - hosts
   - cwd
   - variantfilename
-  - regulatoryfileurl
-  - genefileurl
-  - MANEfileurl
 
 
 vars:
@@ -24,53 +22,25 @@ tasks:
     input: 
       hosts: <% ctx().hosts %>
       cwd: <% ctx().cwd %>
-      timeout: 1000
+      timeout: 200
       cmd: "jq \". | {variant_type: .variant_type, institute: .institute, category: .category, start: .position, end: .end, length: .length, chromosome: .chromosome, chromosomeEND: .end_chrom,  Name: .sub_category} | select(.category== \\\"sv\\\"), select(.category == \\\"cancer_sv\\\")\" <% ctx().variantfilename %> | jq -s"
     next:
-      - when: "{{ succeeded() }}"
+      - when: <% succeeded() and result().get(ctx().hosts).stdout != [] %>
         publish:
           - variantfile: <% result().get(ctx().hosts).stdout %>
         do:
-          - get_regulatory_data
-      - when: "{{ failed() }}"
-        publish:
-          - msg: <% result().stderr %>
-        do:
-          - report_failure
-         
-  get_regulatory_data:
-    action: st2_annotationtracks.regulatory_data
-    input:
-      regulatoryfileurl: <% ctx().regulatoryfileurl %>
-    next:
-      - when: "{{ succeeded() }}"
-        publish:
-          - msg: <% result().stdout %>
-        do:
-          - get_gene_data
-      - when: "{{ failed() }}"
-        publish:
-          - msg: <% result().stderr %>
-        do:
-          - report_failure
-
-  get_gene_data:
-    action: st2_annotationtracks.gene_data
-    input:
-      MANEfileurl: <% ctx().MANEfileurl %>
-      genefileurl: <% ctx().genefileurl %>
-    next:
-      - when: "{{ succeeded() }}"
-        publish:
-          - msg: <% result().stdout %>
-        do:
           - make_clustering
-      - when: "{{ failed() }}"
+      - when: <% succeeded() and result().get(ctx().hosts).stdout = [] %>
         publish:
-          - msg: <% result().stderr %>
+          - msg: <% result().get(ctx().hosts).stderr %>
         do:
           - report_failure
-
+      - when: "{{ failed() }}"
+        publish:
+          - msg: <% result().get(ctx().hosts).stderr %>
+        do:
+          - report_failure
+          
   make_clustering:
     action: st2_annotationtracks.clustering
     input:
@@ -113,7 +83,7 @@ tasks:
           - upload_into_gens
       - when: "{{ failed() }}"
         publish:
-          - msg: <% result().get(ctx().hosts)..stderr %>
+          - msg: <% result().get(ctx().hosts).stderr %>
         do:
           - report_failure
         
@@ -121,6 +91,7 @@ tasks:
     action: st2_annotationtracks.gens_update
     input:
       annnotationtracks: <% ctx().annnotationtracks %>
+      timeout: 500
     next:
       - when: "{{ succeeded() }}"
         publish:

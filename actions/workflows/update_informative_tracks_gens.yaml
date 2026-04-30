@@ -3,9 +3,11 @@ version: 1.0
 name: update_informative_tracks_gens
 description: Workflow to create informative (phenotype, dosage sensitivity ...) annotationtracks and update the existing annotationtracks in Gens
 
+
 input:
   - hosts
   - cwd
+
 
 vars:
  - msg:
@@ -13,12 +15,21 @@ vars:
 
 
 tasks:
+  get_disease_related_variants:
+    action: st2_annotationtracks.disease_related_variants
+    next:
+      - when: "{{ succeeded() }}"
+        publish:
+          - annnotationtracks: <% result().result %>
+        do:
+          - get_phenotype_data
+    
   get_phenotype_data:
     action: st2_annotationtracks.clinical_significance
     next:
       - when: "{{ succeeded() }}"
         publish:
-          - annnotationtracks: <% result().result %>
+          - annnotationtracks: <% ctx().annnotationtracks + result().result %>
         do:
           - get_dosage_sensitivity
   
@@ -29,8 +40,17 @@ tasks:
         publish:
           - annnotationtracks: <% ctx().annnotationtracks + result().result %>
         do:
+          - get_public_variants
+  
+  get_public_variants:
+    action: st2_annotationtracks.public_variantsy
+    next:
+      - when: "{{ succeeded() }}"
+        publish:
+          - annnotationtracks: <% ctx().annnotationtracks + result().result %>
+        do:
           - copy_into_gens_container
-    
+
   copy_into_gens_container:
     action: st2_annotationtracks.upload_tracks_to_gens
     input:

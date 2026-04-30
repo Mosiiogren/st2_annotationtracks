@@ -12,6 +12,7 @@ class ClusteringData(Action):
         self.df_clusters = pd.DataFrame(
             columns=[
                 "cluster_number",
+                "category",
                 "chromosome",
                 "chromosomeEND",
                 "start",
@@ -40,10 +41,10 @@ class ClusteringData(Action):
     ) -> tuple[bool, str]:
 
         # REMOVE WHEN DONE!!!
-        if Path(outputfileclusters).exists():
-            return (True, "Cluster file already exists!")
-
+        # if Path(outputfileclusters).exists():
+        #     return (True, "Cluster file already exists!")
         df_variant = pd.DataFrame(variantfile)
+
         df_gene = pd.read_json(genedata, orient="records")
         df_regulatory = pd.read_json(regulatorydata, orient="records")
         df_exon = pd.read_json(exondata, orient="records")
@@ -52,6 +53,7 @@ class ClusteringData(Action):
         df_variant["interchromosomal"] = np.where(
             (df_variant["chromosome"] == df_variant["chromosomeEND"]), "True", "False"
         )
+        print(df_variant["chromosomeEND"])
 
         for SV in df_variant.itertuples(index=False):
             genes = self.get_all_regulatory_elements(
@@ -106,6 +108,7 @@ class ClusteringData(Action):
         self.number_of_clusters += 1
         self.df_clusters.loc[len(self.df_clusters)] = [
             self.number_of_clusters,
+            SV.category,
             SV.chromosome,
             SV.chromosomeEND,
             float(SV.start),
@@ -138,6 +141,7 @@ class ClusteringData(Action):
         df_matches = self.df_clusters[
             (self.df_clusters["chromosome"] == SV.chromosome)
             & (self.df_clusters["chromosomeEND"] == SV.chromosomeEND)
+            & (self.df_clusters["category"] == SV.category)
             & (self.df_clusters["Name"] == SV.Name)
             & (self.df_clusters["start"] + SV_range >= SV.start)
             & (self.df_clusters["start"] - SV_range <= SV.start)
@@ -259,6 +263,7 @@ class ClusteringData(Action):
             strand_match = df_gene[(df_gene["gene_id"] == gene)]
             strand = strand_match["strand"].values.tolist()
 
+            # Only check introns that belong to MANE status genes
             for i in range(1, len(all_exons["exon_number"].unique()) + 1):
 
                 if strand[0] == "+":

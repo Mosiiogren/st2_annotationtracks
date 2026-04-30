@@ -47,13 +47,13 @@ class Annotationtracks(Action):
         # BND cannot be placed in GENS, however one can add a cluster that starts at one chromosome
         # And another cluster that ends at another chromosome to be able to visualize them in Gens
         df_non_interchromosomal_copy = df_non_interchromosomal.copy()
-        df_non_interchromosomal_copy.drop = df_non_interchromosomal_copy.drop(
-            "end", axis=1
-        )
+        df_non_interchromosomal_copy = df_non_interchromosomal_copy.drop("end", axis=1)
         df_non_interchromosomal_copy["end"] = df_non_interchromosomal_copy["start"] + 1
-        df_non_interchromosomal = df_non_interchromosomal.drop(
-            ["start", "chromosome"], axis=1
-        )
+
+        # Do I need this?
+        # df_non_interchromosomal = df_non_interchromosomal.drop(
+        #     ["start", "chromosome"], axis=1
+        # )
         df_non_interchromosomal.loc[:, "start"] = df_non_interchromosomal["end"] - 1
         df_non_interchromosomal["chromosome"] = df_non_interchromosomal["chromosomeEND"]
 
@@ -124,24 +124,38 @@ class Annotationtracks(Action):
         # Remove unwanted chromsomes which cannot be displaced in Gens
         df = df[df["chromosome"].str.contains("Un|EBV|random|M") == False].copy()
 
-        df["start"] = df["start"].astype(int)
-        df["end"] = df["end"].astype(int)
+        df["start"] = df["start"].astype("int")
+        df["end"] = df["end"].astype("int")
 
         filenames = []
-        for SVtype in df["Name"].unique():
-            df_copy = df[df["Name"] == SVtype]
+        for category in df["category"].unique():
+            for SVtype in df["Name"].unique():
+                df_copy = df[(df["Name"] == SVtype) & (df["category"] == category)]
 
-            df_copy = df_copy.drop(
-                df_copy.columns.difference(
-                    ["chromosome", "start", "end", "color", "comments"]
-                ),
-                axis=1,
-            )
-            df_copy.to_csv(
-                (outputfolder + f"annotationtrackfiles_{SVtype}.tsv"),
-                sep="\t",
-                index=False,
-            )
-            filenames.append(f"annotationtrackfiles_{SVtype}.tsv")
+                if df_copy.empty:
+                    continue
+
+                df_copy = df_copy.drop(
+                    df_copy.columns.difference(
+                        [
+                            "chromosome",
+                            "start",
+                            "end",
+                            "color",
+                            "comments",
+                        ]
+                    ),
+                    axis=1,
+                )
+                df_copy.to_csv(
+                    (outputfolder + f"annotationtrackfiles_{category}_{SVtype}.tsv"),
+                    sep="\t",
+                    index=False,
+                )
+                filenames.append(f"annotationtrackfiles_{category}_{SVtype}.tsv")
 
         return filenames
+
+
+# Lägg till vilka gener en SV överlappar -> Extra viktigt till duplications
+# -> Fast är det på samma ställe? Eller var har duplication hamnat?

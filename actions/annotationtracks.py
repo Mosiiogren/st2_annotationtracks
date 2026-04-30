@@ -155,7 +155,3 @@ class Annotationtracks(Action):
                 filenames.append(f"annotationtrackfiles_{category}_{SVtype}.tsv")
 
         return filenames
-
-
-# Lägg till vilka gener en SV överlappar -> Extra viktigt till duplications
-# -> Fast är det på samma ställe? Eller var har duplication hamnat?

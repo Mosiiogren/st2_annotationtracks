@@ -1,0 +1,24 @@
+---
+name: disease_related_variants
+enabled: True
+description: Retrieve and filter disease-related SV data
+runner_type: python-script
+entry_point: disease_related_variants.py
+parameters:
+  url:
+    type: string
+    description: Link to the disease-related SVs at SV4GD, information seen at https://bio-computing.hrbmu.edu.cn/SV4GD/download
+    default: "https://bio-computing.hrbmu.edu.cn/SV4GD/data/Disease-Related%20SVs.json"
+    position: 0
+  outputfolder:
+    type: string
+    description: Path 
+    default: "/storage/annotationtracks/"
+    immutable: True
+    position: 1
+  filename:
+    type: string
+    description: Path 
+    default: "DiseasRelatedSV.tsv"
+    immutable: True
+    position: 2

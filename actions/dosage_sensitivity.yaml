@@ -5,19 +5,21 @@ description: Retrieve and filter dosage sensitivity data
 runner_type: python-script
 entry_point: dosage_sensitivity.py
 parameters:
-  dosagesensitivityfileurl:
+  url:
     type: string
     description: Link to the dosage sensitivity at ClinGen, information seen at https://ftp.clinicalgenome.org/README
     default: "https://ftp.clinicalgenome.org/ClinGen_gene_curation_list_GRCh38.tsv"
     position: 0
-  outputdosagesensitivity:
+  outputfolder:
     type: string
     description: Path 
     default: "/storage/annotationtracks/"
     immutable: True
     position: 1
-  columns:
-    type: array
-    description: List of columns in the datafiles
-    default: ["Gene Symbol","Gene ID cytoBand","Genomic Location","Haploinsufficiency Score","Haploinsufficiency Description","Haploinsufficiency PMID1","Haploinsufficiency PMID2","Haploinsufficiency PMID3","Haploinsufficiency PMID4","Haploinsufficiency PMID5","Haploinsufficiency PMID6","Triplosensitivity Score","Triplosensitivity Description","Triplosensitivity PMID1","Triplosensitivity PMID2","Triplosensitivity PMID3","Triplosensitivity PMID4","Triplosensitivity PMID5","Triplosensitivity PMID6","Date Last Evaluated","Haploinsufficiency Disease ID","Triplosensitivity Disease ID"]
+  filename:
+    type: string
+    description: Path 
+    default: "DosageSensitivity.tsv"
+    immutable: True
     position: 2
+  

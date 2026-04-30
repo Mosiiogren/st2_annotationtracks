@@ -1,10 +1,8 @@
-import re
 import io
 import requests
 import datetime
 
 import pandas as pd
-import numpy as np
 from pathlib import Path
 
 from st2common.runners.base_action import Action
@@ -19,37 +17,23 @@ COLOR = {
 }
 
 
-class RegulatoryData(Action):
+class DosageSensativeData(Action):
 
-    def run(
-        self, dosagesensitivityfileurl: str, outputdosagesensitivity: str, columns: list
-    ) -> tuple[bool, str]:
+    def run(self, url: str, outputfolder: str, filename: str) -> tuple[bool, str]:
 
-        if Path("/storage/refrencedata/dosagesignificance.json").exists():
-
-            df = pd.read_json(
-                "/storage/refrencedata/dosagesignificance.json", orient="records"
-            )
-
-            df = self.get_genomic_position(df)
-            df = self.combine_PMID(df)
-            df = self.add_color(df)
-            df = self.add_comments(df)
-            filename = self.create_annotationtrack_files(df, outputdosagesensitivity)
-
-            return (True, filename)
-
-        succeded, results = self.get_data(dosagesensitivityfileurl, columns)
+        succeded, results = self.get_data(url)
         if not succeded:
             return (False, results)
 
-        results.to_json(
-            "/storage/refrencedata/dosagesignificance.json", orient="records"
-        )
+        df = self.get_genomic_position(results)
+        df = self.combine_PMID(df)
+        df = self.add_color(df)
+        df = self.add_comments(df)
+        filename = self.create_annotationtrack_files(df, outputfolder, filename)
 
-        return (True, "Working")
+        return (True, filename)
 
-    def get_data(self, url: str, columns: list) -> tuple[bool, pd.DataFrame | str]:
+    def get_data(self, url: str) -> tuple[bool, pd.DataFrame | str]:
         """
         Function for retrieving data from request
         """
@@ -154,31 +138,34 @@ class RegulatoryData(Action):
         Function for adding a column consisting of comments
         Comments are visually separate in Gens by ;
         """
+        df = df.astype(str)
 
         df["comments"] = (
-            "Gene Symbol: "
-            + df["#Gene Symbol"].astype(str)
+            "ClinGen"
+            + ";"
+            + "Gene Symbol: "
+            + df["#Gene Symbol"]
             + ";"
             + "Haploinsufficiency Description: "
-            + df["Haploinsufficiency Description"].astype(str)
+            + df["Haploinsufficiency Description"]
             + ";"
             + "PMID list Haploinsufficiency: "
-            + df["PMID list Haploinsufficiency"].astype(str)
+            + df["PMID list Haploinsufficiency"]
             + ";"
             + "Haploinsufficiency Disease ID: "
-            + df["Haploinsufficiency Disease ID"].astype(str)
+            + df["Haploinsufficiency Disease ID"]
             + ";"
             + "Triplosensitivity Description: "
-            + df["Triplosensitivity Description"].astype(str)
+            + df["Triplosensitivity Description"]
             + ";"
             + "PMID list Triplosensitivity: "
-            + df["PMID list Triplosensitivity"].astype(str)
+            + df["PMID list Triplosensitivity"]
             + ";"
             + "Triplosensitivity Disease ID: "
-            + df["Triplosensitivity Disease ID"].astype(str)
+            + df["Triplosensitivity Disease ID"]
             + ";"
             + "Date Last Evaluated: "
-            + df["Date Last Evaluated"].astype(str)
+            + df["Date Last Evaluated"]
             + ";"
             + "Track created at: "
             + datetime.datetime.now().strftime("%c")
@@ -186,7 +173,9 @@ class RegulatoryData(Action):
 
         return df
 
-    def create_annotationtrack_files(self, df: pd.DataFrame, outputfolder: str) -> str:
+    def create_annotationtrack_files(
+        self, df: pd.DataFrame, outputfolder: str, filename: str
+    ) -> str:
 
         df = df.drop(
             df.columns.difference(
@@ -200,7 +189,8 @@ class RegulatoryData(Action):
             axis=1,
         )
 
-        filename = "DosageSensitivity"
+        df["start"] = df["start"].astype("int")
+        df["end"] = df["end"].astype("int")
 
         df.to_csv(
             (outputfolder + filename),

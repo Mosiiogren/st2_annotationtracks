@@ -139,10 +139,3 @@ class PublicStructuralVariantsData(Action):
             filenames.append(f"{filename}_{SVtype}.tsv")
 
         return filenames
-
-
-# Contains all information -> Should be better although there will be al lot of SVs displayed
-# https://ftp.ncbi.nlm.nih.gov/pub/dbVar/sandbox/sv_datasets/nonredundant/deletions/GRCh38.nr_deletions.tsv.gz
-
-# Add ACMG genes
-# https://ftp.ncbi.nlm.nih.gov/pub/dbVar/sandbox/annotation/GRCh38/ACMG_genes.gff.gz

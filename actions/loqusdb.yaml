@@ -1,0 +1,12 @@
+---
+name: loqusdb
+enabled: True
+description: Cluster the given variants based on similarity and functions
+runner_type: python-script
+entry_point: loqusdb.py
+parameters:
+  variantfile:
+    type: string
+    description: CSV file containing variant data
+    default: "/storage/refrencedata/sv_variants.csv"
+    position: 0

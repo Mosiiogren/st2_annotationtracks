@@ -1,6 +1,6 @@
 ---
 version: 1.0
-name: update_regulatory_elements
+name: update_genomic_elements
 description: Workflow to create regulatory elements files for clustering and create annotationtracks for Gens
 
 
@@ -19,7 +19,7 @@ vars:
 
 tasks:
   get_regulatory_data:
-    action: st2_annotationtracks.regulatory_data
+    action: Annotationtracks.regulatory_data
     input:
       regulatoryfileurl: <% ctx().regulatoryfileurl %>
     next:
@@ -30,34 +30,24 @@ tasks:
           - get_gene_data
 
   get_gene_data:
-    action: st2_annotationtracks.gene_data
+    action: Annotationtracks.gene_data
     input:
       MANEfileurl: <% ctx().MANEfileurl %>
       genefileurl: <% ctx().genefileurl %>
     next:
       - when: "{{ succeeded() }}"
         publish:
-          - msg: <% result().stdout %>
-        do:
-          - copy_into_gens_container
-
-  copy_into_gens_container:
-    action: st2_annotationtracks.upload_tracks_to_gens
-    input:
-      annnotationtracks: <% ctx().annnotationtracks %>
-    next:
-      - when: "{{ succeeded() }}"
-        publish:
-          - msg: "Annotationtracks has been copied into the Gens container"
+          - annnotationtracks: <% ctx().annnotationtracks + result().result %>
         do:
           - upload_into_gens
 
   upload_into_gens:
-    action: st2_annotationtracks.gens_update
+    action: Annotationtracks.upload_tracks_to_gens
     input:
       annnotationtracks: <% ctx().annnotationtracks %>
-      timeout: 500
+      timeout: 10000
     next:
       - when: "{{ succeeded() }}"
         publish:
-          - msg: <% result().get(ctx().hosts).stderr %>
+          - msg: "Annotationtracks has been copied and uploaded to Gens"
+        

@@ -1,6 +1,6 @@
 ---
 name: update_structuralvariant_tracks_gens
-pack: st2_annotationtracks
+pack: Annotationtracks
 description: Workflow to create and update structural variant annotationtracks in Gens
 runner_type: orquesta
 entry_point: workflows/update_structuralvariant_tracks_gens.yaml
@@ -18,10 +18,10 @@ parameters:
     type: string
     default: "{{ config_context.cwd }}"
     immutable: True
-  variantfilename:
+  variantfile:
     description: The filepath to the file containing the variants
     type: string
-    default: "data/dumps/cancer_sv_variants.json"
+    default: "/storage/refrencedata/sv_variants.csv"
   
 
   

@@ -6,9 +6,9 @@ runner_type: python-script
 entry_point: clustering.py
 parameters:
   variantfile:
-    type: array
-    description: JSON array containing variant data
-    required: True
+    type: string
+    description: CSV file containing variant data
+    default: "/storage/refrencedata/sv_variants.csv"
     position: 0
   genedata:
     type: string

@@ -1,6 +1,6 @@
 ---
 name: update_informative_tracks_gens
-pack: st2_annotationtracks
+pack: Annotationtracks
 description: Workflow to create and update informative annotationtracks in Gens
 runner_type: orquesta
 entry_point: workflows/update_informative_tracks_gens.yaml

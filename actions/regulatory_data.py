@@ -11,15 +11,27 @@ from pathlib import Path
 from st2common.runners.base_action import Action
 
 
+# colorBlindness::Blue2Gray8Steps
+COLOR = {
+    "promoter": "121, 130, 52",
+    "enhancer": "163, 173, 98",
+    "tf_binding_site": "208, 211, 162",
+    "ctcf_binding_site": "240, 198, 195",
+    "open_chromatin_region": "223, 145, 163",
+    "emar": "212, 103, 128",
+    "Unknown": "153, 153, 153",
+}
+
+
 class RegulatoryData(Action):
 
     def run(
         self,
         regulatoryfileurl: list[str],
         outputfileregulatory: str,
+        outputfoldertracks: str,
         columns: list[str],
         attributes: list[str],
-        outputfileregulatorytracks: str,
         filename: str,
     ) -> tuple[bool, str]:
 
@@ -32,9 +44,12 @@ class RegulatoryData(Action):
             df = pd.concat([df, results])
 
         df = self.add_comments(df)
+        df = self.add_color(df)
         self.save_to_file(df, outputfileregulatory)
         filename = self.create_annotationtrack_files(
-            df, outputfileregulatorytracks, filename
+            df,
+            outputfoldertracks,
+            filename,
         )
 
         return (True, filename)
@@ -47,11 +62,23 @@ class RegulatoryData(Action):
         """
         try:
             response = requests.get(url)
+            if response.status_code == 429:
+                return (False, f"Too many requests! {response.status_code}")
+
             response.raise_for_status()
             try:
                 response = decompress(response.content)
             except:
                 return (False, f"File {url} is not a gzip-compressed file")
+        except requests.exceptions.HTTPError as error:
+            (
+                False,
+                f"HTTP problem with request from {url}, errormessage: {error.args[0]}",
+            )
+        except requests.exceptions.ReadTimeout as error:
+            (False, f"Timeout for {url}, errormessage: {error.args[0]}")
+        except requests.exceptions.ConnectionError:
+            (False, f"Problem with internet connection during request of {url}")
         except:
             return (False, f"Problem with request from {url}")
 
@@ -135,11 +162,24 @@ class RegulatoryData(Action):
 
         return df
 
+    def add_color(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Function for adding a color to respectively SV type
+        """
+
+        for element in df["Type"].unique():
+            if element.lower() in COLOR.keys():
+                df.loc[df["Type"] == element, "color"] = COLOR[element.lower()]
+            else:
+                df.loc[df["Type"] == element, "color"] = COLOR["Unknown"]
+
+        return df
+
     def save_to_file(self, df: pd.DataFrame, outputfile):
         """
         Function for saving data to json file
         """
-        df = df[df["Type"] != "open_chromatin_region"]
+        df = df[(df["Type"] != "open_chromatin_region") & (df["Type"] != "EMAR")]
         df.to_json(outputfile, orient="records")
 
     def create_annotationtrack_files(

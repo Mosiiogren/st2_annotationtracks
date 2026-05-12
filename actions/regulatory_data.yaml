@@ -7,8 +7,8 @@ entry_point: regulatory_data.py
 parameters:
   regulatoryfileurl:
     type: array
-    description: Link to the regulatory data at Ensemble, information seen at https://ftp.ensembl.org/pub/release-113/regulation/homo_sapiens/README.md
-    default: [https://ftp.ensembl.org/pub/release-115/regulation/homo_sapiens/GRCh38/annotation/Homo_sapiens.GRCh38.EMARs.v115.gff.gz,"https://ftp.ensembl.org/pub/release-115/regulation/homo_sapiens/GRCh38/annotation/Homo_sapiens.GRCh38.regulatory_features.v115.gff3.gz"]
+    description: Link to the regulatory data at Ensemble, information seen at https://ftp.ensembl.org/pub/release-116/regulation/README.md
+    default: [https://ftp.ensembl.org/pub/release-116/regulation/homo_sapiens/GRCh38/annotation/Homo_sapiens.GRCh38.EMARs.v116.gff.gz,"https://ftp.ensembl.org/pub/release-116/regulation/homo_sapiens/GRCh38/annotation/Homo_sapiens.GRCh38.regulatory_features.v116.gff3.gz"]
     position: 0
   outputfileregulatory:
     type: string
@@ -16,10 +16,10 @@ parameters:
     default: "{{ config_context.outputfileregulatory }}"
     immutable: True
     position: 1
-  outputfileregulatorytracks:
+  outputfoldertracks:
     type: string
     description: Path to where the filtered regulatory data should be stored
-    default: "/storage/annotationtracks/"
+    default: "{{ config_context.outputfolderannotationtracks }}"
     immutable: True
     position: 2
   columns:

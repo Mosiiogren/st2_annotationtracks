@@ -13,7 +13,7 @@ parameters:
   outputfolder:
     type: string
     description: Path 
-    default: "/storage/annotationtracks/"
+    default: "{{ config_context.outputfolderannotationtracks }}"
     immutable: True
     position: 1
   filename:

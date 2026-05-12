@@ -1,9 +1,9 @@
 ---
-name: update_regulatory_elements
-pack: st2_annotationtracks
+name: update_genomic_elements
+pack: Annotationtracks
 description: Workflow to create and update Regulatory elements for clustering and for updates to Gens
 runner_type: orquesta
-entry_point: workflows/update_regulatory_elements.yaml
+entry_point: workflows/update_genomic_elements.yaml
 enabled: true
 
 

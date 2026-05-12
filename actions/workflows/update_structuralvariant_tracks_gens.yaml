@@ -7,44 +7,20 @@ description: Workflow to create annotationtracks and update the existing annotat
 input:
   - hosts
   - cwd
-  - variantfilename
+  - variantfile
 
 
 vars:
- - variantfile:
  - msg:
  - annnotationtracks:
 
 
-tasks:
-  open_variant_file:
-    action: core.remote
-    input: 
-      hosts: <% ctx().hosts %>
-      cwd: <% ctx().cwd %>
-      timeout: 200
-      cmd: "jq \". | {variant_type: .variant_type, institute: .institute, category: .category, start: .position, end: .end, length: .length, chromosome: .chromosome, chromosomeEND: .end_chrom,  Name: .sub_category} | select(.category== \\\"sv\\\"), select(.category == \\\"cancer_sv\\\")\" <% ctx().variantfilename %> | jq -s"
-    next:
-      - when: <% succeeded() and result().get(ctx().hosts).stdout != [] %>
-        publish:
-          - variantfile: <% result().get(ctx().hosts).stdout %>
-        do:
-          - make_clustering
-      - when: <% succeeded() and result().get(ctx().hosts).stdout = [] %>
-        publish:
-          - msg: <% result().get(ctx().hosts).stderr %>
-        do:
-          - report_failure
-      - when: "{{ failed() }}"
-        publish:
-          - msg: <% result().get(ctx().hosts).stderr %>
-        do:
-          - report_failure
-          
+tasks: 
   make_clustering:
-    action: st2_annotationtracks.clustering
+    action: Annotationtracks.clustering
     input:
       variantfile: <% ctx().variantfile %>
+      timeout: 1000000
     next:
       - when: "{{ succeeded() }}"
         publish:
@@ -58,49 +34,33 @@ tasks:
           - report_failure
 
   make_annotationtracks:
-    action: st2_annotationtracks.annotationtracks
+    action: Annotationtracks.annotationtracks
     next:
       - when: "{{ succeeded() }}"
         publish:
           - annnotationtracks: <% result().result %>
         do:
-         - copy_into_gens_container
+         - upload_into_gens
       - when: "{{ failed() }}"
         publish:
           - msg: <% result().stderr %>
         do:
           - report_failure
         
-  copy_into_gens_container:
-    action: st2_annotationtracks.upload_tracks_to_gens
-    input:
-      annnotationtracks: <% ctx().annnotationtracks %>
-    next:
-      - when: "{{ succeeded() }}"
-        publish:
-          - msg: "Annotationtracks has been copied into the Gens container"
-        do:
-          - upload_into_gens
-      - when: "{{ failed() }}"
-        publish:
-          - msg: <% result().get(ctx().hosts).stderr %>
-        do:
-          - report_failure
-        
   upload_into_gens:
-    action: st2_annotationtracks.gens_update
+    action: Annotationtracks.upload_tracks_to_gens
     input:
       annnotationtracks: <% ctx().annnotationtracks %>
-      timeout: 500
+      timeout: 100000
     next:
       - when: "{{ succeeded() }}"
         publish:
-          - msg: <% result().get(ctx().hosts).stderr %>
+          - msg: "Annotationtracks has been copied and uploaded to Gens"
         do:
           - report_finished
       - when: "{{ failed() }}"
         publish:
-          - msg: <% result().result %>
+          - msg: <% result().get(ctx().hosts).stderr %>
         do:
           - report_failure
   

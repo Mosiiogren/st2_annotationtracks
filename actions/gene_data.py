@@ -1,5 +1,6 @@
 import re
 import io
+import datetime
 import requests
 import pandas as pd
 import numpy as np
@@ -18,8 +19,12 @@ class GeneData(Action):
         self,
         MANEfileurl: str,
         genefileurl: str,
+        columns: list[str],
+        attributes: list[str],
         outputfilegene: str,
         outputfileexon: str,
+        outputfoldertracks: str,
+        filename: str,
     ) -> tuple[bool, str]:
 
         succeded, results = self.get_MANE_data(MANEfileurl)
@@ -27,7 +32,7 @@ class GeneData(Action):
             return (False, results)
         df_MANE_data = self.filter_MANE_data(results)
 
-        succeded, results = self.get_gene_data(genefileurl)
+        succeded, results = self.get_gene_data(genefileurl, columns, attributes)
         if not succeded:
             return (False, results)
         df_ENSEMBL_data = self.filter_gene_data(results)
@@ -36,21 +41,23 @@ class GeneData(Action):
         df_transcripts = df_ENSEMBL_data[(df_ENSEMBL_data["feature"] == "transcript")]
         df_exons = df_ENSEMBL_data[(df_ENSEMBL_data["feature"] == "exon")]
 
-        # Create genedataframe consisting of MANE status and Ensembl_canonical genes
         df_genes = self.create_MANE_genes_dataframe(
             df_transcripts, df_MANE_data, df_ENSEMBL_genes
         )
 
-        # Create genedataframe consisting on only exons from MANE status transcripts
         df_exons = self.crete_MANE_exons_dataframe(df_exons, df_genes)
 
         df_genes.to_json(outputfilegene, orient="records")
         df_exons.to_json(outputfileexon, orient="records")
 
-        return (
-            True,
-            f"Saved gene data to {outputfilegene} and exon data to {outputfileexon}",
+        df_genes = self.add_comments(df_genes)
+        filename = self.create_annotationtrack_files(
+            df_genes,
+            outputfoldertracks,
+            filename,
         )
+
+        return (True, filename)
 
     def get_MANE_data(self, url: str) -> tuple[bool, pd.DataFrame | str]:
         """
@@ -68,7 +75,9 @@ class GeneData(Action):
 
         return True, df
 
-    def get_gene_data(self, url: str) -> tuple[bool, pd.DataFrame | str]:
+    def get_gene_data(
+        self, url: str, columns: list[str], attributes: list[str]
+    ) -> tuple[bool, pd.DataFrame | str]:
         """
         Function for retrieving gene data from request
         """
@@ -84,33 +93,16 @@ class GeneData(Action):
             dtype=str,
         )
         try:
-            df.columns = [
-                "seqname",
-                "source",
-                "feature",
-                "start",
-                "end",
-                "score",
-                "strand",
-                "frame",
-                "attribute",
-            ]
+            df.columns = columns
         except:
             return (False, f"Invalid columns for File {url}")
 
         succeded, results = self.get_attributes(
             df=df,
-            attributes=[
-                "gene_id",
-                "gene_name",
-                "gene_biotype",
-                "exon_id",
-                "exon_number",
-                "transcript_id",
-                "tag",
-            ],
+            attributes=attributes,
             last_column="attribute",
         )
+
         if not succeded:
             return False, results
 
@@ -122,11 +114,23 @@ class GeneData(Action):
         """
         try:
             response = requests.get(url)
+            if response.status_code == 429:
+                return (False, f"Too many requests! {response.status_code}")
+
             response.raise_for_status()
             try:
                 response = decompress(response.content)
             except:
                 return (False, f"File {url} is not a gzip-compressed file")
+        except requests.exceptions.HTTPError as error:
+            (
+                False,
+                f"HTTP problem with request from {url}, errormessage: {error.args[0]}",
+            )
+        except requests.exceptions.ReadTimeout as error:
+            (False, f"Timeout for {url}, errormessage: {error.args[0]}")
+        except requests.exceptions.ConnectionError:
+            (False, f"Problem with internet connection during request of {url}")
         except:
             return (False, f"Problem with request from {url}")
 
@@ -162,7 +166,7 @@ class GeneData(Action):
         df = df[df["GRCh38_chr"].str.contains("NC") == True].copy()
         df.loc[:, "GRCh38_chr"] = df["GRCh38_chr"].str.split(".").str[0]
         df.loc[:, "GRCh38_chr"] = df["GRCh38_chr"].str.split("_").str[1]
-        # df["GRCh38_chr"] = df["GRCh38_chr"].astype("int").astype("str")
+        df["GRCh38_chr"] = df["GRCh38_chr"].astype("int").astype("str")
         df.loc[df["GRCh38_chr"] == "23", "GRCh38_chr"] = "X"
         df.loc[df["GRCh38_chr"] == "24", "GRCh38_chr"] = "Y"
 
@@ -170,26 +174,32 @@ class GeneData(Action):
         df.loc[:, "Ensembl_Gene"] = df["Ensembl_Gene"].str.split(".").str[0]
         df.loc[:, "Ensembl_nuc"] = df["Ensembl_nuc"].str.split(".").str[0]
         df = df.rename(
-            columns={"Ensembl_nuc": "transcript_id", "Ensembl_Gene": "gene_id"}
+            columns={
+                "Ensembl_nuc": "transcript_id",
+                "Ensembl_Gene": "gene_id",
+                "chr_start": "start",
+                "chr_end": "end",
+                "GRCh38_chr": "chromosome",
+                "symbol": "gene_name",
+                "chr_strand": "strand",
+            }
         )
 
         df = df.drop(
             df.columns.difference(
                 [
                     "gene_id",
-                    "symbol",
+                    "gene_name",
                     "transcript_id",
                     "MANE_status",
-                    "GRCh38_chr",
-                    "chr_start",
-                    "chr_end",
+                    "chromosome",
+                    "start",
+                    "end",
+                    "strand",
                 ]
             ),
             axis=1,
         )
-
-        df["chr_start"] = df["chr_start"].astype("int")
-        df["chr_end"] = df["chr_end"].astype("int")
 
         return df
 
@@ -201,9 +211,6 @@ class GeneData(Action):
         # Remove version from chromosome
         df.loc[:, "seqname"] = df["seqname"].str.split(".").str[0]
         df.rename(columns={"seqname": "chromosome"}, inplace=True)
-
-        df["start"] = df["start"].astype("int")
-        df["end"] = df["end"].astype("int")
 
         df = df[df["chromosome"].str.contains("Un|EBV|random|M|KI|GL") == False]
         df = df.drop(["score", "frame", "source"], axis=1)
@@ -220,95 +227,31 @@ class GeneData(Action):
         Function for slecting MANE status and Ensemble tagged transcripts
         """
 
-        # Merge MANE and ENSEMBLE dataframes based on transcript id
-        df_transcripts_MANE_Ensemble = pd.merge(
-            df_transcripts, df_MANE, on="transcript_id", how="outer"
-        )
-
-        # If there is a MANE status on the trasncript, change the start and end positons to the ones in the MANE dataframe
-        df_transcripts_MANE_Ensemble.loc[
-            df_transcripts_MANE_Ensemble["MANE_status"].notna(), "start"
-        ] = df_transcripts_MANE_Ensemble["chr_start"]
-        df_transcripts_MANE_Ensemble.loc[
-            df_transcripts_MANE_Ensemble["MANE_status"].notna(), "end"
-        ] = df_transcripts_MANE_Ensemble["chr_end"]
-
-        # If MANE status is nan but there is a tag corresponding to the transcript id, add the tag as MANE status
-        df_transcripts_MANE_Ensemble.loc[
+        # Retrieve all transcripts of genes not included in the MANE datafile
+        df_transcripts_Ensemble = df_transcripts[
+            ~df_transcripts.gene_id.isin(df_MANE.gene_id)
+        ]
+        df_transcripts_Ensemble.loc[
             (
-                (df_transcripts_MANE_Ensemble["tag"] == "Ensembl_canonical")
-                | (df_transcripts_MANE_Ensemble["tag"] == "gencode_primary")
-                | (df_transcripts_MANE_Ensemble["tag"] == "gencode_basic")
-            )
-            & (df_transcripts_MANE_Ensemble["MANE_status"].isna()),
+                (df_transcripts_Ensemble["tag"] == "Ensembl_canonical")
+                | (df_transcripts_Ensemble["tag"] == "gencode_primary")
+            ),
             "MANE_status",
-        ] = df_transcripts_MANE_Ensemble["tag"]
+        ] = df_transcripts_Ensemble["tag"]
 
-        # If the chromosme or gene name is gone for the trancript, add the corresponding chromosme from the MANE dataframe instead
-        df_transcripts_MANE_Ensemble.loc[
-            (df_transcripts_MANE_Ensemble["chromosome"].isna()), "chromosome"
-        ] = df_transcripts_MANE_Ensemble["GRCh38_chr"]
-        df_transcripts_MANE_Ensemble.loc[
-            (df_transcripts_MANE_Ensemble["symbol"].isna())
-            & (df_transcripts_MANE_Ensemble["gene_name"].notna()),
-            "symbol",
-        ] = df_transcripts_MANE_Ensemble["gene_name"]
-
-        # Remove all transcripts that don't have a MANE status
-        df_transcripts_MANE_Ensemble = df_transcripts_MANE_Ensemble.drop(
-            df_transcripts_MANE_Ensemble[
-                df_transcripts_MANE_Ensemble["MANE_status"].isna()
-            ].index
-        )
-
-        # There are duplicates where different transcripts_id has been taken out for the same gene, these needs to be removed
-        df_transcripts_MANE_Ensemble["MANE_status"] = pd.Categorical(
-            df_transcripts_MANE_Ensemble["MANE_status"],
-            categories=[
-                "MANE Plus Clinical",
-                "MANE Select",
-                "gencode_primary",
-                "Ensembl_canonical",
-                "gencode_basic",
-                "-",
-            ],
-            ordered=True,
-        )
-        df_transcripts_MANE_Ensemble.sort_values("MANE_status", inplace=True)
-        df_transcripts_MANE_Ensemble.drop_duplicates(
-            subset=["gene_id_x"], keep="first", inplace=True
-        )
-
-        # Retrieve all genes that did not conatin a MANE status
-        # This should be removed
-        df_genes_Ensemble = df_genes[
-            ~df_genes.gene_id.isin(df_transcripts_MANE_Ensemble.gene_id_x)
+        df_transcripts_Ensemble = df_transcripts_Ensemble[
+            (df_transcripts_Ensemble["MANE_status"].notna())
         ]
 
-        df_genes_Ensemble = df_genes_Ensemble.drop(
-            ["feature", "exon_id", "exon_number", "tag"], axis=1
-        )
-        df_transcripts_MANE_Ensemble = df_transcripts_MANE_Ensemble.drop(
-            [
-                "gene_id_y",
-                "feature",
-                "gene_name",
-                "GRCh38_chr",
-                "tag",
-                "chr_start",
-                "chr_end",
-                "exon_id",
-                "exon_number",
-            ],
-            axis=1,
-        )
-        df_transcripts_MANE_Ensemble.rename(
-            columns={"gene_id_x": "gene_id", "symbol": "gene_name"}, inplace=True
-        )
+        # Add all the transcripts together
+        df_all_transcripts = pd.concat([df_transcripts_Ensemble, df_MANE])
 
-        df_all_genes = pd.concat([df_transcripts_MANE_Ensemble, df_genes_Ensemble])
+        # Retrieve all genes not included in the transcript datafile
+        df_genes_Ensemble = df_genes[~df_genes.gene_id.isin(df_all_transcripts.gene_id)]
+        df_all_genes = pd.concat([df_genes_Ensemble, df_all_transcripts])
 
-        df_all_genes = df_all_genes[(df_all_genes["gene_biotype"] != "artifact")]
+        df_all_genes.loc[df_all_genes["MANE_status"].isna(), "MANE_status"] = "-"
+        df_all_genes.loc[df_all_genes["transcript_id"].isna(), "transcript_id"] = "-"
 
         return df_all_genes
 
@@ -317,31 +260,221 @@ class GeneData(Action):
         Function for slecting the exons belonging to the MANE status and Ensemble tagged transcripts
         """
 
-        df_exons = df_exons.drop(
-            [
-                "chromosome",
-                "feature",
-                "gene_name",
-                "gene_biotype",
-                "tag",
-                "strand",
-                "gene_id",
-            ],
+        df_genes = df_genes[df_genes["MANE_status"].notna()]
+        df_exons = df_exons[df_exons.transcript_id.isin(df_genes.transcript_id)]
+
+        return df_exons
+
+    def add_comments(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Function for adding a column consisting of comments
+        Comments are visually separate in Gens by ;
+        """
+        df = df.astype(str)
+
+        df["comments"] = (
+            "Ensembl"
+            + ";"
+            + "Gene ID: "
+            + df["gene_id"]
+            + ";"
+            + "Gene name: "
+            + df["gene_name"]
+            + ";"
+            + "Gene biotype: "
+            + df["gene_biotype"]
+            + ";"
+            + "MANE Status: "
+            + df["MANE_status"]
+            + ";"
+            + "Transcript ID: "
+            + df["transcript_id"]
+            + ";"
+            + "Track created at: "
+            + datetime.datetime.now().strftime("%c")
+        )
+
+        return df
+
+    def create_annotationtrack_files(
+        self, df: pd.DataFrame, outputfolder: str, filename: str
+    ) -> list[str]:
+
+        df = df.drop(
+            df.columns.difference(
+                [
+                    "chromosome",
+                    "start",
+                    "end",
+                    "comments",
+                ]
+            ),
             axis=1,
         )
-        df_genes = df_genes.drop(["start", "end", "strand", "gene_biotype"], axis=1)
+        df["start"] = df["start"].astype("float").astype("int")
+        df["end"] = df["end"].astype("float").astype("int")
 
-        # Merge genes and exons based on transcriptid
-        df_exons_transcript = pd.merge(
-            df_exons, df_genes, on="transcript_id", how="right"
+        df.to_csv(
+            (outputfolder + filename),
+            sep="\t",
+            index=False,
         )
 
-        # Remove exons without MANE status and gene_id
-        df_exons_transcript = df_exons_transcript.drop(
-            df_exons_transcript[df_exons_transcript["MANE_status"].isna()].index
-        )
-        df_exons_transcript = df_exons_transcript.drop(
-            df_exons_transcript[df_exons_transcript["gene_id"].isna()].index
-        )
+        return [filename]
 
-        return df_exons_transcript
+
+# Gör en annoteringsfil med generna
+# Sedan gör en annoteringsfil med bara primary och basic och se om det blir någon skillnad
+
+
+# # Merge MANE and ENSEMBLE dataframes based on transcript id
+#         df_transcripts_MANE_Ensemble = pd.merge(
+#             df_transcripts, df_MANE, on="transcript_id", how="outer"
+#         )
+
+#         # If there is a MANE status on the trasncript, change the start and end positons to the ones in the MANE dataframe
+#         df_transcripts_MANE_Ensemble.loc[
+#             df_transcripts_MANE_Ensemble["MANE_status"].notna(), "start"
+#         ] = df_transcripts_MANE_Ensemble["chr_start"]
+#         df_transcripts_MANE_Ensemble.loc[
+#             df_transcripts_MANE_Ensemble["MANE_status"].notna(), "end"
+#         ] = df_transcripts_MANE_Ensemble["chr_end"]
+#         df_transcripts_MANE_Ensemble.loc[
+#             df_transcripts_MANE_Ensemble["gene_id_y"].notna(), "gene_id_x"
+#         ] = df_transcripts_MANE_Ensemble["gene_id_y"]
+
+#         # print(
+#         #     df_transcripts_MANE_Ensemble[
+#         #         ["tag", "MANE_status", "symbol", "transcript_id"]
+#         #     ]
+#         # )
+#         # If MANE status is nan but there is a tag corresponding to the transcript id, add the tag as MANE status
+#         df_transcripts_MANE_Ensemble.loc[
+#             (
+#                 (df_transcripts_MANE_Ensemble["tag"] == "Ensembl_canonical")
+#                 | (df_transcripts_MANE_Ensemble["tag"] == "gencode_primary")
+#                 | (df_transcripts_MANE_Ensemble["tag"] == "gencode_basic")
+#             )
+#             & (df_transcripts_MANE_Ensemble["MANE_status"].isna()),
+#             "MANE_status",
+#         ] = df_transcripts_MANE_Ensemble["tag"]
+
+#         # If the chromosme or gene name is gone for the trancript, add the corresponding chromosme from the MANE dataframe instead
+#         df_transcripts_MANE_Ensemble.loc[
+#             (df_transcripts_MANE_Ensemble["chromosome"].isna()), "chromosome"
+#         ] = df_transcripts_MANE_Ensemble["GRCh38_chr"]
+#         df_transcripts_MANE_Ensemble.loc[
+#             (df_transcripts_MANE_Ensemble["symbol"].isna())
+#             & (df_transcripts_MANE_Ensemble["gene_name"].notna()),
+#             "symbol",
+#         ] = df_transcripts_MANE_Ensemble["gene_name"]
+
+#         # Remove all transcripts that don't have a MANE status
+#         df_transcripts_MANE_Ensemble = df_transcripts_MANE_Ensemble.drop(
+#             df_transcripts_MANE_Ensemble[
+#                 df_transcripts_MANE_Ensemble["MANE_status"].isna()
+#             ].index
+#         )
+
+#         # Keep all transcripts with a MANE Plus Clinical tag
+#         df_MANE_Plus_Clinical = df_transcripts_MANE_Ensemble[
+#             df_transcripts_MANE_Ensemble["MANE_status"] == "MANE Plus Clinical"
+#         ]
+
+#         # print("DUPLICATES")
+#         # duplicates = df_transcripts_MANE_Ensemble[
+#         #     df_transcripts_MANE_Ensemble.duplicated(subset=["gene_id_x"])
+#         # ]
+
+#         # print(
+#         #     duplicates[["gene_id_x", "tag", "MANE_status", "symbol", "transcript_id"]]
+#         # )
+
+#         # There are duplicates where different transcripts_id has been taken out for the same gene, these needs to be removed
+#         df_transcripts_MANE_Ensemble["MANE_status"] = pd.Categorical(
+#             df_transcripts_MANE_Ensemble["MANE_status"],
+#             categories=[
+#                 "MANE Plus Clinical",
+#                 "MANE Select",
+#                 "gencode_primary",
+#                 "Ensembl_canonical",
+#                 "gencode_basic",
+#                 "-",
+#             ],
+#             ordered=True,
+#         )
+#         df_transcripts_MANE_Ensemble.sort_values("MANE_status", inplace=True)
+#         df_transcripts_MANE_Ensemble.drop_duplicates(
+#             subset=["gene_id_x"], keep="first", inplace=True
+#         )
+
+#         # Add the Mane status transcripts with the MANE Plus Clinical
+#         df_transcripts_MANE_Ensemble = pd.concat(
+#             [df_transcripts_MANE_Ensemble, df_MANE_Plus_Clinical]
+#         )
+
+#         # Retrieve all genes that did not conatin a MANE status
+#         df_genes_Ensemble = df_genes[
+#             ~df_genes.gene_id.isin(df_transcripts_MANE_Ensemble.gene_id_x)
+#         ]
+
+#         df_genes_Ensemble = df_genes_Ensemble.drop(
+#             ["feature", "exon_id", "exon_number", "tag"], axis=1
+#         )
+#         df_transcripts_MANE_Ensemble = df_transcripts_MANE_Ensemble.drop(
+#             [
+#                 "gene_id_y",
+#                 "feature",
+#                 "gene_name",
+#                 "GRCh38_chr",
+#                 "tag",
+#                 "chr_start",
+#                 "chr_end",
+#                 "exon_id",
+#                 "exon_number",
+#             ],
+#             axis=1,
+#         )
+#         df_transcripts_MANE_Ensemble.rename(
+#             columns={"gene_id_x": "gene_id", "symbol": "gene_name"}, inplace=True
+#         )
+
+#         df_all_genes = pd.concat([df_transcripts_MANE_Ensemble, df_genes_Ensemble])
+
+#         # print(df_all_genes)
+
+#         df_all_genes = df_all_genes[(df_all_genes["gene_biotype"] != "artifact")]
+
+#         return df_all_genes
+
+#     def crete_MANE_exons_dataframe(self, df_exons, df_genes) -> pd.DataFrame:
+#         """
+#         Function for slecting the exons belonging to the MANE status and Ensemble tagged transcripts
+#         """
+
+#         df_exons = df_exons.drop(
+#             [
+#                 "chromosome",
+#                 "feature",
+#                 "gene_name",
+#                 "gene_biotype",
+#                 "tag",
+#                 "strand",
+#                 "gene_id",
+#             ],
+#             axis=1,
+#         )
+#         df_genes = df_genes.drop(["start", "end", "strand", "gene_biotype"], axis=1)
+
+#         # Merge genes and exons based on transcriptid
+#         df_exons_transcript = pd.merge(
+#             df_exons, df_genes, on="transcript_id", how="right"
+#         )
+
+#         # Remove exons without MANE status and gene_id
+#         df_exons_transcript = df_exons_transcript.drop(
+#             df_exons_transcript[df_exons_transcript["MANE_status"].isna()].index
+#         )
+#         df_exons_transcript = df_exons_transcript.drop(
+#             df_exons_transcript[df_exons_transcript["gene_id"].isna()].index
+#         )

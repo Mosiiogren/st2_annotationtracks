@@ -8,22 +8,44 @@ parameters:
   MANEfileurl:
     type: string
     description: Link to the MANE data at Ensemble, information seen at https://ftp.ncbi.nlm.nih.gov/refseq/MANE/MANE_human/release_1.4/README.txt
-    default: "https://ftp.ncbi.nlm.nih.gov/refseq/MANE/MANE_human/release_1.4/MANE.GRCh38.v1.4.summary.txt.gz"
+    default: "https://ftp.ncbi.nlm.nih.gov/refseq/MANE/MANE_human/release_1.5/MANE.GRCh38.v1.5.summary.txt.gz"
     position: 0
   genefileurl:
     type: string
-    description: Link to the gene data at Ensemble, information seen at https://ftp.ensembl.org/pub/release-113/gtf/homo_sapiens/README
-    default: "https://ftp.ensembl.org/pub/release-113/gtf/homo_sapiens/Homo_sapiens.GRCh38.113.gtf.gz"
+    description: Link to the gene data at Ensemble, information seen at https://ftp.ensembl.org/pub/release-115/gtf/homo_sapiens/README
+    default: "https://ftp.ensembl.org/pub/release-114/gtf/homo_sapiens/Homo_sapiens.GRCh38.114.gtf.gz"
     position: 1
+  columns:
+    type: array
+    description: List of columns in the dataframe
+    default: ["seqname","source","feature","start","end","score","strand","frame","attribute"]
+    position: 2
+  attributes:
+    type: array
+    description: List of attributes
+    default: ["gene_id","gene_name","gene_biotype","exon_id","exon_number","transcript_id","tag"]
+    position: 3
   outputfilegene:
     type: string
     description: Path to where the filtered gene data should be stored
     default: "{{ config_context.outputfilegene }}"
     immutable: True
-    position: 2
+    position: 4
   outputfileexon:
     type: string
     description: Path to where the filtered exon data should be stored
     default: "{{ config_context.outputfileexon }}"
     immutable: True
-    position: 3
+    position: 5
+  outputfoldertracks:
+    type: string
+    description: Path to where the filtered regulatory data should be stored
+    default: "{{ config_context.outputfolderannotationtracks }}"
+    immutable: True
+    position: 6
+  filename:
+    type: string
+    description: Filename
+    default: "genes.tsv"
+    immutable: True
+    position: 7

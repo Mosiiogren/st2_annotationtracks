@@ -29,17 +29,23 @@ st2_annotationtracks.annotationtracks                | Creates annotation trackf
 st2_annotationtracks.clustering                      | Cluster the given structural variants based on similarity and functions.
 st2_annotationtracks.gene_data                       | Retrieve and filter gene data based on MANE status.
 st2_annotationtracks.regulatory_data                 | Retrieve and filter regulatory data.
+st2_annotationtracks.public_variants                 | Retrieve and filter known pathogenic/common structural variants.
+st2_annotationtracks.dosage_sensitivity              | Retrieve and filter known dosage sensitive genes.
+st2_annotationtracks.disease_related_variants        | Retrieve and filter litterature based disease related variants.
+st2_annotationtracks.clinical_significance           | Retrieve and filter clinical isgnificant structural variants
 
 ## Workflows
 
-ref                                                  | description
------------------------------------------------------|------------------------------------------------------------------------
-st2_annotationtracks.update_annotationtracks_in_gens | Workflow for generating and updating annotationtrack files in Gens.
+ref                                                       | description
+----------------------------------------------------------|------------------------------------------------------------------------
+st2_annotationtracks.update_structuralvariant_tracks_gens | Workflow for generating and updating structural variant annotationtracks in Gens.
+st2_annotationtracks.update_genomic_elements              | Workflow for generating and updating genomic element annotationtracks in Gens.
+st2_annotationtracks.update_informative_tracks_gens       | Workflow for generating and updating informative annotationtracks in Gens.
 
 ## Rules
 
-ref                                                  | description
------------------------------------------------------|------------------------------------------------------------------------
-st2_annotationtracks.update_annotation_tracks        | Generate a timer to update the annotationtracks every friday at 18.
+ref                                                        | description
+-----------------------------------------------------------|------------------------------------------------------------------------
+st2_annotationtracks.update_annotation_tracks              | Generate a timer to update the annotationtracks every friday at 18.
 
 

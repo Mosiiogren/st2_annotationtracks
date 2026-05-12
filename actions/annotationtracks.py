@@ -4,16 +4,16 @@ import numpy as np
 
 from st2common.runners.base_action import Action
 
-
+# colorblindr::Okabelto
 COLOR = {
-    "DEL": "255,0,0",
-    "DUP": "0,0,255",
-    "INS": "34, 139, 34",
-    "DUP:TANDEM": "0,0,0",
-    "INV": "79,28,115",
-    "BND": "0, 255, 0",
-    "DUP:INV": "200, 200, 200",
-    "Unknown": "100, 100, 150",
+    "DEL": "230, 159, 0",
+    "DUP": "86, 180, 233",
+    "INS": "0, 158, 115",
+    "DUP:TANDEM": "240, 228, 66",
+    "INV": "0, 114, 178",
+    "BND": "213, 94, 0",
+    "DUP:INV": "204, 121, 167",
+    "Unknown": "153, 153, 153",
 }
 
 
@@ -69,21 +69,47 @@ class Annotationtracks(Action):
         Comments are visually separate in Gens by ;
         """
 
+        df = df.astype(str)
+
         df["comments"] = np.where(
             (df["chromosome"] == df["chromosomeEND"]),
-            "Number of SVs included in the cluster: "
+            "SVs included in the cluster: "
             + df["score"].astype(str)
             + ";"
-            + "SV TYPE: "
+            + "SV type: "
             + df["Name"].astype(str)
+            + ";"
+            + "Overlapping genes: "
+            + df["genes"].astype(str)
+            + ";"
+            + "Overlapping exons: "
+            + df["exons"].astype(str)
+            + ";"
+            + "Overlapping introns: "
+            + df["introns"].astype(str)
+            + ";"
+            + "Overlapping regulatory factors: "
+            + df["regulatory_factors"].astype(str)
             + ";"
             + "Track created at: "
             + datetime.datetime.now().strftime("%c"),
-            "Number of SVs included in the cluster: "
+            "SVs included in the cluster: "
             + df["score"].astype(str)
             + ";"
-            + "SV TYPE: "
+            + "SV type: "
             + df["Name"].astype(str)
+            + ";"
+            + "Overlapping genes: "
+            + df["genes"].astype(str)
+            + ";"
+            + "Overlapping exons: "
+            + df["exons"].astype(str)
+            + ";"
+            + "Overlapping introns: "
+            + df["introns"].astype(str)
+            + ";"
+            + "Overlapping regulatory factors: "
+            + df["regulatory_factors"].astype(str)
             + ";"
             + "Start Chromosome: "
             + df["chromosome"].astype(str)
@@ -124,8 +150,8 @@ class Annotationtracks(Action):
         # Remove unwanted chromsomes which cannot be displaced in Gens
         df = df[df["chromosome"].str.contains("Un|EBV|random|M") == False].copy()
 
-        df["start"] = df["start"].astype("int")
-        df["end"] = df["end"].astype("int")
+        df["start"] = df["start"].astype("float").astype("int")
+        df["end"] = df["end"].astype("float").astype("int")
 
         filenames = []
         for category in df["category"].unique():

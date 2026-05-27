@@ -1,9 +1,9 @@
 ---
-name: clustering
+name: hdbscan
 enabled: True
 description: Cluster the given variants based on similarity and functions
 runner_type: python-script
-entry_point: clustering.py
+entry_point: hdbscan.py
 parameters:
   variantfile:
     type: string
@@ -31,7 +31,19 @@ parameters:
   outputfileclusters:
     type: string
     description: Path to where the clusters should be stored
-    default: "{{ config_context.outputfileclusters }}"
+    default: "/storage/annotationtracks/hdbscanclustering.json"
     immutable: True
     position: 4
+  outputfilefigure:
+    type: string
+    description: Path to where the clusters should be stored
+    default: "/storage/annotationtracks/density_score.svg"
+    immutable: True
+    position: 5
+  outputfolder:
+    type: string
+    description: Path to where the annotationtracks should be stored
+    default: "{{ config_context.outputfolderannotationtracks }}"
+    immutable: True
+    position: 6
   

@@ -23,7 +23,10 @@ class Annotationtracks(Action):
     """
 
     def run(self, clusteringdata, outputfolder) -> tuple[bool, list[str]]:
+
         df = pd.read_json(clusteringdata, orient="records")
+        df["start"] = df["start"].astype("float").astype("int")
+        df["end"] = df["end"].astype("float").astype("int")
 
         df = self.add_interchromosomal(df)
         df = self.add_comments(df)
@@ -37,28 +40,24 @@ class Annotationtracks(Action):
         """
         Function for adding interchromosomal information -> important for BND where start and stop chromosomes are not the same
         """
-        df["interchromosomal"] = np.where(
-            (df["chromosome"] == df["chromosomeEND"]), "True", "False"
-        )
 
-        df_interchromosomal = df[df["interchromosomal"] == "True"]
-        df_non_interchromosomal = df[df["interchromosomal"] == "False"]
+        df_intrachromosomal = df[df["intrachromosomal"] == "True"]
+        df_non_intrachromosomal = df[df["intrachromosomal"] == "False"]
 
         # BND cannot be placed in GENS, however one can add a cluster that starts at one chromosome
         # And another cluster that ends at another chromosome to be able to visualize them in Gens
-        df_non_interchromosomal_copy = df_non_interchromosomal.copy()
-        df_non_interchromosomal_copy = df_non_interchromosomal_copy.drop("end", axis=1)
-        df_non_interchromosomal_copy["end"] = df_non_interchromosomal_copy["start"] + 1
+        df_non_intrachromosomal_copy = df_non_intrachromosomal.copy()
+        df_non_intrachromosomal_copy = df_non_intrachromosomal_copy.drop("end", axis=1)
+        df_non_intrachromosomal_copy["end"] = df_non_intrachromosomal_copy["start"] + 1
+        df_non_intrachromosomal_copy["chromosomeEND"] = df_non_intrachromosomal_copy[
+            "chromosome"
+        ]
 
-        # Do I need this?
-        # df_non_interchromosomal = df_non_interchromosomal.drop(
-        #     ["start", "chromosome"], axis=1
-        # )
-        df_non_interchromosomal.loc[:, "start"] = df_non_interchromosomal["end"] - 1
-        df_non_interchromosomal["chromosome"] = df_non_interchromosomal["chromosomeEND"]
+        df_non_intrachromosomal.loc[:, "start"] = df_non_intrachromosomal["end"] - 1
+        df_non_intrachromosomal["chromosome"] = df_non_intrachromosomal["chromosomeEND"]
 
         df = pd.concat(
-            [df_interchromosomal, df_non_interchromosomal, df_non_interchromosomal_copy]
+            [df_intrachromosomal, df_non_intrachromosomal, df_non_intrachromosomal_copy]
         )
 
         return df
@@ -70,9 +69,8 @@ class Annotationtracks(Action):
         """
 
         df = df.astype(str)
-
         df["comments"] = np.where(
-            (df["chromosome"] == df["chromosomeEND"]),
+            (df["intrachromosomal"] == "True"),
             "SVs included in the cluster: "
             + df["score"].astype(str)
             + ";"
@@ -87,9 +85,6 @@ class Annotationtracks(Action):
             + ";"
             + "Overlapping introns: "
             + df["introns"].astype(str)
-            + ";"
-            + "Overlapping regulatory factors: "
-            + df["regulatory_factors"].astype(str)
             + ";"
             + "Track created at: "
             + datetime.datetime.now().strftime("%c"),
@@ -107,9 +102,6 @@ class Annotationtracks(Action):
             + ";"
             + "Overlapping introns: "
             + df["introns"].astype(str)
-            + ";"
-            + "Overlapping regulatory factors: "
-            + df["regulatory_factors"].astype(str)
             + ";"
             + "Start Chromosome: "
             + df["chromosome"].astype(str)

@@ -17,10 +17,10 @@ vars:
 
 tasks: 
   make_clustering:
-    action: Annotationtracks.clustering
+    action: annotationtracks.clustering
     input:
       variantfile: <% ctx().variantfile %>
-      timeout: 1000000
+      timeout: 10000000
     next:
       - when: "{{ succeeded() }}"
         publish:
@@ -34,7 +34,7 @@ tasks:
           - report_failure
 
   make_annotationtracks:
-    action: Annotationtracks.annotationtracks
+    action: annotationtracks.annotationtracks
     next:
       - when: "{{ succeeded() }}"
         publish:
@@ -48,7 +48,7 @@ tasks:
           - report_failure
         
   upload_into_gens:
-    action: Annotationtracks.upload_tracks_to_gens
+    action: annotationtracks.upload_tracks_to_gens
     input:
       annnotationtracks: <% ctx().annnotationtracks %>
       timeout: 100000

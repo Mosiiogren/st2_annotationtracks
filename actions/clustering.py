@@ -15,6 +15,7 @@ class ClusteringData(Action):
                 "category",
                 "chromosome",
                 "chromosomeEND",
+                "intrachromosomal",
                 "start",
                 "end",
                 "score",
@@ -27,17 +28,12 @@ class ClusteringData(Action):
             ]
         )
 
-        self.number_of_clusters = 0
-
         self.SV_range_large = 10000
         self.SV_range_medium = 5000
-        self.SV_range_small = 2500
+        self.SV_range_small = 500
 
-        self.test_small = [5, 10, 30, 50, 100, 150, 250, 500]
-        self.test_small2 = [100, 200, 300, 500, 1000, 1500, 2500, 5000]
-        self.test_large = [1000, 2000, 3000, 5000, 10000, 15000, 25000, 50000]
-        self.test_result = []
-
+        self.number_of_clusters = 0
+        self.count = 0
         self.minimum_overlapping_genomic_elements_percentage = 1
 
     def run(
@@ -50,140 +46,124 @@ class ClusteringData(Action):
     ) -> tuple[bool, str]:
 
         df_variant = pd.read_csv(variantfile)
-        df_variant = df_variant.rename(
+        df_gene = pd.read_json(genedata, orient="records")
+        df_regulatory = pd.read_json(regulatorydata, orient="records")
+        df_exon = pd.read_json(exondata, orient="records")
+
+        df_variant = self.filter_variant_data(df_variant)
+
+        for SV in df_variant.itertuples(index=False):
+            genomic_elements, genes, exons, introns, regulators = (
+                self.get_all_regulatory_elements(SV, df_gene, df_regulatory, df_exon)
+            )
+            SV_range = self.check_SV_length(SV)
+
+            df_matches = self.find_matching_clusters(SV, SV_range)
+
+            if df_matches.empty:
+                self.addcluster(SV, genomic_elements, genes, exons, introns, regulators)
+
+            else:
+                matchingclusters, _ = df_matches.shape
+                if matchingclusters > 1:
+
+                    match, cluster_number = self.find_best_macthing_cluster(
+                        df_matches, SV, genomic_elements, SV_range
+                    )
+
+                    if match:
+                        df_matches = df_matches[
+                            (df_matches["cluster_number"] == cluster_number)
+                        ]
+                        self.update_cluster(
+                            self.get_index(df_matches),
+                            SV,
+                            genomic_elements,
+                            genes,
+                            exons,
+                            introns,
+                            regulators,
+                        )
+                    else:
+                        self.addcluster(
+                            SV,
+                            genomic_elements,
+                            genes,
+                            exons,
+                            introns,
+                            regulators,
+                        )
+
+                else:
+                    if (not genomic_elements) & (
+                        not df_matches["genomic_elements"].values.tolist()[0]
+                    ):
+                        self.update_cluster(
+                            self.get_index(df_matches),
+                            SV,
+                            genomic_elements,
+                            genes,
+                            exons,
+                            introns,
+                            regulators,
+                        )
+
+                    elif (not genomic_elements) | (
+                        not df_matches["genomic_elements"].values.tolist()[0]
+                    ):
+                        self.addcluster(
+                            SV, genomic_elements, genes, exons, introns, regulators
+                        )
+
+                    else:
+                        match = self.check_overlapping_genomic_elements(
+                            genomic_elements,
+                            df_matches["genomic_elements"].values.tolist()[0],
+                        )
+                        if match:
+                            self.update_cluster(
+                                self.get_index(df_matches),
+                                SV,
+                                genomic_elements,
+                                genes,
+                                exons,
+                                introns,
+                                regulators,
+                            )
+                        else:
+                            self.addcluster(
+                                SV,
+                                genomic_elements,
+                                genes,
+                                exons,
+                                introns,
+                                regulators,
+                            )
+
+        self.df_clusters.to_json(outputfileclusters, orient="records")
+
+        return (True, f"Clusters are stored in {outputfileclusters}")
+
+    def filter_variant_data(self, df: pd.DataFrame) -> pd.DataFrame:
+        df = df.rename(
             columns={
                 "end_chrom": "chromosomeEND",
                 "position": "start",
                 "sub_category": "Name",
             }
         )
-        df_variant = df_variant[
-            df_variant["chromosome"].str.contains("Un|EBV|random|M|KI|GL") == False
-        ]
-
-        # count = df_variant["Name"].value_counts()
-
-        df_gene = pd.read_json(genedata, orient="records")
-        df_regulatory = pd.read_json(regulatorydata, orient="records")
-        df_exon = pd.read_json(exondata, orient="records")
+        df = df[df["chromosome"].str.contains("Un|EBV|random|M|KI|GL") == False]
 
         # For BND -> Add true/false whether the start and end chromosomes are the same
-        df_variant["intrachromosomal"] = np.where(
-            (df_variant["chromosome"] == df_variant["chromosomeEND"]), "True", "False"
+        df["intrachromosomal"] = np.where(
+            (df["chromosome"] == df["chromosomeEND"]), "True", "False"
         )
 
-        # # Kolla hur långa intrachromosomal SVs är!!!!!
-        # df_test = df_variant[df_variant["intrachromosomal"] == True]
-        # print (df_test[["intrachromosomal", "length"]])
+        df.loc[df["start"] > df["end"], "start_new"] = df["end"]
+        df.loc[df["start"] > df["end"], "end"] = df["start"]
+        df.loc[df["start_new"].notna(), "start"] = df["start_new"]
 
-        df_variant = df_variant[df_variant["chromosome"] == "1"]
-        for i in range(len(self.test_small)):
-            self.df_clusters.drop(self.df_clusters.index, inplace=True)
-
-            for SV in df_variant.itertuples(index=False):
-                genomic_elements, genes, exons, introns, regulators = (
-                    self.get_all_regulatory_elements(
-                        SV, df_gene, df_regulatory, df_exon
-                    )
-                )
-                SV_range = self.check_SV_length(SV.length, SV.Name)
-
-                #### TESTING ####
-                if SV.length > 10000:
-                    SV_range = self.test_large[i]
-                else:
-                    SV_range = abs(int(self.test_small[i] * SV.length))
-
-                print(SV)
-                # print(SV_range)
-                # return True
-                #### TESTING ####
-
-                df_matches = self.find_matching_clusters(SV, SV_range)
-
-                if df_matches.empty:
-                    self.addcluster(
-                        SV, genomic_elements, genes, exons, introns, regulators
-                    )
-
-                else:
-                    matchingclusters, _ = df_matches.shape
-                    if matchingclusters > 1:
-                        match, cluster_number = self.find_best_macthing_cluster(
-                            df_matches, SV, genomic_elements, SV_range
-                        )
-
-                        if match:
-                            df_matches = df_matches[
-                                (df_matches["cluster_number"] == cluster_number)
-                            ]
-                            self.update_cluster(
-                                self.get_index(df_matches),
-                                SV,
-                                genomic_elements,
-                                genes,
-                                exons,
-                                introns,
-                                regulators,
-                            )
-                        else:
-                            self.addcluster(
-                                SV, genomic_elements, genes, exons, introns, regulators
-                            )
-
-                    else:
-                        if (not genomic_elements) & (
-                            not df_matches["genomic_elements"].values.tolist()[0]
-                        ):
-                            self.update_cluster(
-                                self.get_index(df_matches),
-                                SV,
-                                genomic_elements,
-                                genes,
-                                exons,
-                                introns,
-                                regulators,
-                            )
-
-                        elif (not genomic_elements) | (
-                            not df_matches["genomic_elements"].values.tolist()[0]
-                        ):
-                            self.addcluster(
-                                SV, genomic_elements, genes, exons, introns, regulators
-                            )
-
-                        else:
-                            match = self.check_overlapping_genomic_elements(
-                                genomic_elements,
-                                df_matches["genomic_elements"].values.tolist()[0],
-                            )
-                            if match:
-                                self.update_cluster(
-                                    self.get_index(df_matches),
-                                    SV,
-                                    genomic_elements,
-                                    genes,
-                                    exons,
-                                    introns,
-                                    regulators,
-                                )
-                            else:
-                                self.addcluster(
-                                    SV,
-                                    genomic_elements,
-                                    genes,
-                                    exons,
-                                    introns,
-                                    regulators,
-                                )
-
-            self.test_result.append(len(self.df_clusters))
-            print(len(self.df_clusters))
-
-        print(self.test_result)
-        # self.df_clusters.to_json(outputfileclusters, orient="records")
-
-        # return (True, f"Clusters are stored in {outputfileclusters}")
+        return df
 
     def addcluster(
         self,
@@ -204,6 +184,7 @@ class ClusteringData(Action):
             SV.category,
             SV.chromosome,
             SV.chromosomeEND,
+            SV.intrachromosomal,
             float(SV.start),
             float(SV.end),
             1,
@@ -258,6 +239,7 @@ class ClusteringData(Action):
         df_matches = self.df_clusters[
             (self.df_clusters["chromosome"] == SV.chromosome)
             & (self.df_clusters["chromosomeEND"] == SV.chromosomeEND)
+            & (self.df_clusters["intrachromosomal"] == SV.intrachromosomal)
             & (self.df_clusters["category"] == SV.category)
             & (self.df_clusters["Name"] == SV.Name)
             & (self.df_clusters["start"] + SV_range >= SV.start)
@@ -298,17 +280,15 @@ class ClusteringData(Action):
                 continue
 
             else:
-                match = self.check_overlapping_genomic_elements(
+                match_overlap = self.check_overlapping_genomic_elements(
                     genomic_elements, cluster.genomic_elements
                 )
-                if match:
+                if match_overlap:
                     # Check if the distance is lower than other candidates
                     if distance < min_distance:
                         min_distance = distance
                         cluster_number = cluster.cluster_number
                         match = True
-                    else:
-                        match = False
 
         return match, cluster_number
 
@@ -336,21 +316,27 @@ class ClusteringData(Action):
         return df_matches[column_out].values.tolist()
 
     def get_matches_interchromosomal(
-        self, SV: tuple, df: pd.DataFrame, column_out: str
+        self,
+        SV: tuple,
+        df: pd.DataFrame,
+        column_match: str,
+        column_SV_start: tuple,
+        column_SV_end: tuple,
+        column_out: str,
     ) -> list[str]:
         """
         Function that checks overlapping regulatory elements for each chromosome
         """
 
         df_matches = df[
-            (df["chromosome"] == SV.chromosome)
+            (df[column_match] == column_SV_start)
             & (df["start"] <= SV.start)
             & (df["end"] >= SV.start)
         ]
         matches1 = df_matches[column_out].values.tolist()
 
         df_matches = df[
-            (df["chromosome"] == SV.chromosomeEND)
+            (df[column_match] == column_SV_end)
             & (df["start"] <= SV.end)
             & (df["end"] >= SV.end)
         ]
@@ -359,18 +345,23 @@ class ClusteringData(Action):
         return matches1 + matches2
 
     def get_exons(
-        self, SV: tuple, genomic_elements: list[str], df_exon: pd.DataFrame
+        self, SV: tuple, genes: list[str], df_exon: pd.DataFrame
     ) -> list[str]:
         """
         Function that returns the exons the SV is overlapping
         """
 
         exons = []
-        for gene in genomic_elements:
 
-            exons_matches = self.get_matches_intrachromosomal(
-                SV, df_exon, "gene_id", gene, "exon_id"
-            )
+        for gene in genes:
+            if SV.intrachromosomal == "False":
+                exons_matches = self.get_matches_interchromosomal(
+                    SV, df_exon, "gene_id", gene, gene, "exon_id"
+                )
+            else:
+                exons_matches = self.get_matches_intrachromosomal(
+                    SV, df_exon, "gene_id", gene, "exon_id"
+                )
             exons.extend(exons_matches)
 
         return exons
@@ -378,7 +369,7 @@ class ClusteringData(Action):
     def get_introns(
         self,
         SV: tuple,
-        genomic_elements: list[str],
+        genes: list[str],
         df_gene: pd.DataFrame,
         df_exon: pd.DataFrame,
     ) -> list[str]:
@@ -387,7 +378,7 @@ class ClusteringData(Action):
         The function considers the strands direction in order to retrieve the correct intron number
         """
         introns = []
-        for gene in genomic_elements:
+        for gene in genes:
             all_exons = df_exon[(df_exon["gene_id"] == gene)]
             strand_match = df_gene[(df_gene["gene_id"] == gene)]
             strand = strand_match["strand"].values.tolist()
@@ -463,8 +454,12 @@ class ClusteringData(Action):
         """
 
         if SV.intrachromosomal == "False":
-            genes = self.get_matches_interchromosomal(SV, df_gene, "gene_id")
-            regulators = self.get_matches_interchromosomal(SV, df_regulatory, "ID")
+            genes = self.get_matches_interchromosomal(
+                SV, df_gene, "chromosome", SV.chromosome, SV.chromosomeEND, "gene_id"
+            )
+            regulators = self.get_matches_interchromosomal(
+                SV, df_regulatory, "chromosome", SV.chromosome, SV.chromosomeEND, "ID"
+            )
         else:
             genes = self.get_matches_intrachromosomal(
                 SV, df_gene, "chromosome", SV.chromosome, "gene_id"
@@ -506,14 +501,6 @@ class ClusteringData(Action):
                 * self.minimum_overlapping_genomic_elements_percentage
             )
 
-        print(f"Clustergenomic_elements: {clustergenomic_elements}")
-        print(f"Length of Clustergenomic_elements: {len(clustergenomic_elements)}")
-        print(f"SVgenomic_elements: {SVgenomic_elements}")
-        print(f"Length of SVgenomic_elements: {len(SVgenomic_elements)}")
-        print(
-            f"Minimu_overlapping_genomic_elements: {minimum_overlapping_genomic_elements}"
-        )
-
         overlapping_genomic_elements = 0
         for gene in SVgenomic_elements:
             if gene in clustergenomic_elements:
@@ -538,14 +525,15 @@ class ClusteringData(Action):
 
         return index
 
-    def check_SV_length(self, length: int, SVtype: str) -> bool:
+    def check_SV_length(self, SV: tuple) -> bool:
         """
         Function for setting the range based on the length of the SV
         """
-
-        if length > 10000:
+        if (abs(SV.length) > 10000) & (SV.intrachromosomal == "True"):
             return self.SV_range_large
-        elif ((length > 4000) & (length <= 10000)) | (SVtype == "BND"):
+        elif ((abs(SV.length) > 1000) & (abs(SV.length) <= 10000)) | (
+            SV.intrachromosomal == "False"
+        ):
             return self.SV_range_medium
         else:
             return self.SV_range_small

@@ -17,7 +17,7 @@ vars:
 
 tasks: 
   make_clustering:
-    action: annotationtracks.clustering
+    action: annotationtracks.manual_clustering
     input:
       variantfile: <% ctx().variantfile %>
       timeout: 10000000

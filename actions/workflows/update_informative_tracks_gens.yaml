@@ -16,7 +16,7 @@ vars:
 
 tasks:
   get_disease_related_variants:
-    action: Annotationtracks.disease_related_variants
+    action: annotationtracks.disease_related_variants
     next:
       - when: "{{ succeeded() }}"
         publish:
@@ -25,7 +25,7 @@ tasks:
           - get_phenotype_data
     
   get_phenotype_data:
-    action: Annotationtracks.clinical_significance
+    action: annotationtracks.clinical_significance
     next:
       - when: "{{ succeeded() }}"
         publish:
@@ -34,7 +34,7 @@ tasks:
           - get_dosage_sensitivity
   
   get_dosage_sensitivity:
-    action: Annotationtracks.dosage_sensitivity
+    action: annotationtracks.dosage_sensitivity
     next:
       - when: "{{ succeeded() }}"
         publish:
@@ -43,7 +43,7 @@ tasks:
           - get_public_variants
   
   get_public_variants:
-    action: Annotationtracks.public_variants
+    action: annotationtracks.public_variants
     next:
       - when: "{{ succeeded() }}"
         publish:
@@ -52,7 +52,7 @@ tasks:
           - upload_into_gens
 
   upload_into_gens:
-    action: Annotationtracks.upload_tracks_to_gens
+    action: annotationtracks.upload_tracks_to_gens
     input:
       annnotationtracks: <% ctx().annnotationtracks %>
       timeout: 10000

@@ -1,6 +1,6 @@
 ---
 name: update_structuralvariant_tracks_gens
-pack: Annotationtracks
+pack: annotationtracks
 description: Workflow to create and update structural variant annotationtracks in Gens
 runner_type: orquesta
 entry_point: workflows/update_structuralvariant_tracks_gens.yaml

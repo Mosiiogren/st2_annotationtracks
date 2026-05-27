@@ -1,5 +1,5 @@
 name: timer
-pack: Annotationtracks
+pack: annotationtracks
 description: Set timer to update annotationtracks every friday at 20 (UTC time, summer=18, winter=19)
 enabled: true
 
@@ -13,7 +13,7 @@ trigger:
       second: "0"
 
 action:
-  ref: Annotationtracks.update_structuralvariant_tracks_gens
+  ref: annotationtracks.update_structuralvariant_tracks_gens
   parameters:
     hosts: "{{ config_context.hosts }}"
     cwd: "{{ config_context.cwd }}"

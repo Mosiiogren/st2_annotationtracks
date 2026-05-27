@@ -19,7 +19,7 @@ vars:
 
 tasks:
   get_regulatory_data:
-    action: Annotationtracks.regulatory_data
+    action: annotationtracks.regulatory_data
     input:
       regulatoryfileurl: <% ctx().regulatoryfileurl %>
     next:
@@ -30,7 +30,7 @@ tasks:
           - get_gene_data
 
   get_gene_data:
-    action: Annotationtracks.gene_data
+    action: annotationtracks.gene_data
     input:
       MANEfileurl: <% ctx().MANEfileurl %>
       genefileurl: <% ctx().genefileurl %>
@@ -42,7 +42,7 @@ tasks:
           - upload_into_gens
 
   upload_into_gens:
-    action: Annotationtracks.upload_tracks_to_gens
+    action: annotationtracks.upload_tracks_to_gens
     input:
       annnotationtracks: <% ctx().annnotationtracks %>
       timeout: 10000

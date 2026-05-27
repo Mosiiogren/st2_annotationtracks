@@ -10,13 +10,12 @@ from gzip import decompress
 from pathlib import Path
 from st2common.runners.base_action import Action
 
-
 # colorBlindness::Blue2Gray8Steps
 COLOR = {
     "promoter": "121, 130, 52",
     "enhancer": "163, 173, 98",
-    "tf_binding_site": "208, 211, 162",
-    "ctcf_binding_site": "240, 198, 195",
+    "tf_binding_site": "240, 198, 195",
+    "ctcf_binding_site": "208, 211, 162",
     "open_chromatin_region": "223, 145, 163",
     "emar": "212, 103, 128",
     "Unknown": "153, 153, 153",
@@ -193,6 +192,7 @@ class RegulatoryData(Action):
                     "start",
                     "end",
                     "comments",
+                    "color",
                 ]
             ),
             axis=1,

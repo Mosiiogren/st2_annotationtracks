@@ -11,6 +11,20 @@ from pathlib import Path
 
 from st2common.runners.base_action import Action
 
+# Palette: Brown2Blue10Steps
+COLOR = {
+    "Likely%20benign": "0, 169, 204",
+    "Benign": "50, 227, 255",
+    "Benign%2FLikely%20benign": "101, 239, 255",
+    "Uncertain%20significance": "204, 253, 255",
+    "Likely%20pathogenic%2C%20low%20penetrance": "242, 218, 205",
+    "Pathogenic%2C%20low%20penetrance": "216, 175, 151",
+    "Pathogenic%2FLikely%20pathogenic": "204, 155, 122",
+    "Likely%20pathogenic": "153, 96, 53",
+    "Pathogenic": "102, 47, 0",
+    "Unknown": "153, 153, 153",
+}
+
 
 class ClinicalSignificance(Action):
 
@@ -37,6 +51,7 @@ class ClinicalSignificance(Action):
             time.sleep(5)
 
         finaldf = self.add_comments(finaldf, attributes)
+        finaldf = self.add_color(finaldf)
         filename = self.create_annotationtrack_files(finaldf, outputfolder, filename)
 
         return (True, filename)
@@ -120,6 +135,8 @@ class ClinicalSignificance(Action):
         df.loc[df["chromosome"] == "23", "chromosome"] = "X"
         df.loc[df["chromosome"] == "24", "chromosome"] = "Y"
 
+        df.loc[:, "Dbxref"] = df["Dbxref"].str.split(",").str[0]
+
         return df
 
     def add_comments(self, df: pd.DataFrame, attributes: list) -> pd.DataFrame:
@@ -177,6 +194,19 @@ class ClinicalSignificance(Action):
 
         return df
 
+    def add_color(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Function for adding a color to respectively SV type
+        """
+
+        for clinical in df["clinical_int"].unique():
+            if clinical in COLOR.keys():
+                df.loc[df["clinical_int"] == clinical, "color"] = COLOR[clinical]
+            else:
+                df.loc[df["clinical_int"] == clinical, "color"] = COLOR["Unknown"]
+
+        return df
+
     def create_annotationtrack_files(
         self, df: pd.DataFrame, outputfolder: str, filename: str
     ) -> list[str]:
@@ -188,6 +218,7 @@ class ClinicalSignificance(Action):
                     "start",
                     "end",
                     "comments",
+                    "color",
                 ]
             ),
             axis=1,

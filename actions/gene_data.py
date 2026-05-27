@@ -9,6 +9,15 @@ from gzip import decompress
 from pathlib import Path
 from st2common.runners.base_action import Action
 
+COLOR = {
+    "mane plus clinical": "144, 238, 144",
+    "mane select": "120. 200, 120",
+    "gencode_primary": "30, 70, 140",
+    "ensembl_canonical": "30, 70, 140",
+    "gencode_basic": "70, 120, 190",
+    "Unknown": "153, 153, 153",
+}
+
 
 class GeneData(Action):
     """
@@ -51,6 +60,7 @@ class GeneData(Action):
         df_exons.to_json(outputfileexon, orient="records")
 
         df_genes = self.add_comments(df_genes)
+        df_genes = self.add_color(df_genes)
         filename = self.create_annotationtrack_files(
             df_genes,
             outputfoldertracks,
@@ -296,6 +306,19 @@ class GeneData(Action):
 
         return df
 
+    def add_color(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Function for adding a color to respectively SV type
+        """
+
+        for status in df["MANE_status"].unique():
+            if status.lower() in COLOR.keys():
+                df.loc[df["MANE_status"] == status, "color"] = COLOR[status.lower()]
+            else:
+                df.loc[df["MANE_status"] == status, "color"] = COLOR["Unknown"]
+
+        return df
+
     def create_annotationtrack_files(
         self, df: pd.DataFrame, outputfolder: str, filename: str
     ) -> list[str]:
@@ -307,6 +330,7 @@ class GeneData(Action):
                     "start",
                     "end",
                     "comments",
+                    "color",
                 ]
             ),
             axis=1,
@@ -321,160 +345,3 @@ class GeneData(Action):
         )
 
         return [filename]
-
-
-# Gör en annoteringsfil med generna
-# Sedan gör en annoteringsfil med bara primary och basic och se om det blir någon skillnad
-
-
-# # Merge MANE and ENSEMBLE dataframes based on transcript id
-#         df_transcripts_MANE_Ensemble = pd.merge(
-#             df_transcripts, df_MANE, on="transcript_id", how="outer"
-#         )
-
-#         # If there is a MANE status on the trasncript, change the start and end positons to the ones in the MANE dataframe
-#         df_transcripts_MANE_Ensemble.loc[
-#             df_transcripts_MANE_Ensemble["MANE_status"].notna(), "start"
-#         ] = df_transcripts_MANE_Ensemble["chr_start"]
-#         df_transcripts_MANE_Ensemble.loc[
-#             df_transcripts_MANE_Ensemble["MANE_status"].notna(), "end"
-#         ] = df_transcripts_MANE_Ensemble["chr_end"]
-#         df_transcripts_MANE_Ensemble.loc[
-#             df_transcripts_MANE_Ensemble["gene_id_y"].notna(), "gene_id_x"
-#         ] = df_transcripts_MANE_Ensemble["gene_id_y"]
-
-#         # print(
-#         #     df_transcripts_MANE_Ensemble[
-#         #         ["tag", "MANE_status", "symbol", "transcript_id"]
-#         #     ]
-#         # )
-#         # If MANE status is nan but there is a tag corresponding to the transcript id, add the tag as MANE status
-#         df_transcripts_MANE_Ensemble.loc[
-#             (
-#                 (df_transcripts_MANE_Ensemble["tag"] == "Ensembl_canonical")
-#                 | (df_transcripts_MANE_Ensemble["tag"] == "gencode_primary")
-#                 | (df_transcripts_MANE_Ensemble["tag"] == "gencode_basic")
-#             )
-#             & (df_transcripts_MANE_Ensemble["MANE_status"].isna()),
-#             "MANE_status",
-#         ] = df_transcripts_MANE_Ensemble["tag"]
-
-#         # If the chromosme or gene name is gone for the trancript, add the corresponding chromosme from the MANE dataframe instead
-#         df_transcripts_MANE_Ensemble.loc[
-#             (df_transcripts_MANE_Ensemble["chromosome"].isna()), "chromosome"
-#         ] = df_transcripts_MANE_Ensemble["GRCh38_chr"]
-#         df_transcripts_MANE_Ensemble.loc[
-#             (df_transcripts_MANE_Ensemble["symbol"].isna())
-#             & (df_transcripts_MANE_Ensemble["gene_name"].notna()),
-#             "symbol",
-#         ] = df_transcripts_MANE_Ensemble["gene_name"]
-
-#         # Remove all transcripts that don't have a MANE status
-#         df_transcripts_MANE_Ensemble = df_transcripts_MANE_Ensemble.drop(
-#             df_transcripts_MANE_Ensemble[
-#                 df_transcripts_MANE_Ensemble["MANE_status"].isna()
-#             ].index
-#         )
-
-#         # Keep all transcripts with a MANE Plus Clinical tag
-#         df_MANE_Plus_Clinical = df_transcripts_MANE_Ensemble[
-#             df_transcripts_MANE_Ensemble["MANE_status"] == "MANE Plus Clinical"
-#         ]
-
-#         # print("DUPLICATES")
-#         # duplicates = df_transcripts_MANE_Ensemble[
-#         #     df_transcripts_MANE_Ensemble.duplicated(subset=["gene_id_x"])
-#         # ]
-
-#         # print(
-#         #     duplicates[["gene_id_x", "tag", "MANE_status", "symbol", "transcript_id"]]
-#         # )
-
-#         # There are duplicates where different transcripts_id has been taken out for the same gene, these needs to be removed
-#         df_transcripts_MANE_Ensemble["MANE_status"] = pd.Categorical(
-#             df_transcripts_MANE_Ensemble["MANE_status"],
-#             categories=[
-#                 "MANE Plus Clinical",
-#                 "MANE Select",
-#                 "gencode_primary",
-#                 "Ensembl_canonical",
-#                 "gencode_basic",
-#                 "-",
-#             ],
-#             ordered=True,
-#         )
-#         df_transcripts_MANE_Ensemble.sort_values("MANE_status", inplace=True)
-#         df_transcripts_MANE_Ensemble.drop_duplicates(
-#             subset=["gene_id_x"], keep="first", inplace=True
-#         )
-
-#         # Add the Mane status transcripts with the MANE Plus Clinical
-#         df_transcripts_MANE_Ensemble = pd.concat(
-#             [df_transcripts_MANE_Ensemble, df_MANE_Plus_Clinical]
-#         )
-
-#         # Retrieve all genes that did not conatin a MANE status
-#         df_genes_Ensemble = df_genes[
-#             ~df_genes.gene_id.isin(df_transcripts_MANE_Ensemble.gene_id_x)
-#         ]
-
-#         df_genes_Ensemble = df_genes_Ensemble.drop(
-#             ["feature", "exon_id", "exon_number", "tag"], axis=1
-#         )
-#         df_transcripts_MANE_Ensemble = df_transcripts_MANE_Ensemble.drop(
-#             [
-#                 "gene_id_y",
-#                 "feature",
-#                 "gene_name",
-#                 "GRCh38_chr",
-#                 "tag",
-#                 "chr_start",
-#                 "chr_end",
-#                 "exon_id",
-#                 "exon_number",
-#             ],
-#             axis=1,
-#         )
-#         df_transcripts_MANE_Ensemble.rename(
-#             columns={"gene_id_x": "gene_id", "symbol": "gene_name"}, inplace=True
-#         )
-
-#         df_all_genes = pd.concat([df_transcripts_MANE_Ensemble, df_genes_Ensemble])
-
-#         # print(df_all_genes)
-
-#         df_all_genes = df_all_genes[(df_all_genes["gene_biotype"] != "artifact")]
-
-#         return df_all_genes
-
-#     def crete_MANE_exons_dataframe(self, df_exons, df_genes) -> pd.DataFrame:
-#         """
-#         Function for slecting the exons belonging to the MANE status and Ensemble tagged transcripts
-#         """
-
-#         df_exons = df_exons.drop(
-#             [
-#                 "chromosome",
-#                 "feature",
-#                 "gene_name",
-#                 "gene_biotype",
-#                 "tag",
-#                 "strand",
-#                 "gene_id",
-#             ],
-#             axis=1,
-#         )
-#         df_genes = df_genes.drop(["start", "end", "strand", "gene_biotype"], axis=1)
-
-#         # Merge genes and exons based on transcriptid
-#         df_exons_transcript = pd.merge(
-#             df_exons, df_genes, on="transcript_id", how="right"
-#         )
-
-#         # Remove exons without MANE status and gene_id
-#         df_exons_transcript = df_exons_transcript.drop(
-#             df_exons_transcript[df_exons_transcript["MANE_status"].isna()].index
-#         )
-#         df_exons_transcript = df_exons_transcript.drop(
-#             df_exons_transcript[df_exons_transcript["gene_id"].isna()].index
-#         )

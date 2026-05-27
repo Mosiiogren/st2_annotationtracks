@@ -2,8 +2,8 @@
 
 ## Installation
 ```bash
-st2 pack install https://github.com/Mosiiogren/st2_annotationtracks
-st2 pack config st2_annotationtracks
+st2 pack install https://github.com/Mosiiogren/Annotationtracks
+st2 pack config Annotationtracks
 ```
 ### Config file
 The following config parameters need to be defined:
@@ -23,29 +23,32 @@ st2 key set notification_email YOUREMAIL
 
 ## Actions
 
-ref                                                  | description
------------------------------------------------------|------------------------------------------------------------------------
-st2_annotationtracks.annotationtracks                | Creates annotation trackfiles from the cluster data.
-st2_annotationtracks.clustering                      | Cluster the given structural variants based on similarity and functions.
-st2_annotationtracks.gene_data                       | Retrieve and filter gene data based on MANE status.
-st2_annotationtracks.regulatory_data                 | Retrieve and filter regulatory data.
-st2_annotationtracks.public_variants                 | Retrieve and filter known pathogenic/common structural variants.
-st2_annotationtracks.dosage_sensitivity              | Retrieve and filter known dosage sensitive genes.
-st2_annotationtracks.disease_related_variants        | Retrieve and filter litterature based disease related variants.
-st2_annotationtracks.clinical_significance           | Retrieve and filter clinical isgnificant structural variants
+ref                                              | description
+-------------------------------------------------|------------------------------------------------------------------------
+Annotationtracks.annotationtracks                | Creates annotation trackfiles from the manual cluster data.
+Annotationtracks.manual_clustering               | Cluster the given structural variants using manual coding based on similarity and functions.
+Annotationtracks.hdbscan_clustering              | Cluster the given structural variants using HDBSCAN based on similarity and functions.
+Annotationtracks.gene_data                       | Retrieve and filter gene data based on MANE status.
+Annotationtracks.regulatory_data                 | Retrieve and filter regulatory data.
+Annotationtracks.public_variants                 | Retrieve and filter known pathogenic/common structural variants.
+Annotationtracks.dosage_sensitivity              | Retrieve and filter known dosage sensitive genes.
+Annotationtracks.disease_related_variants        | Retrieve and filter litterature based disease related variants.
+Annotationtracks.clinical_significance           | Retrieve and filter clinical isgnificant structural variants.
+Annotationtracks.upload_tracks_to_gens           | Uploads annotation tracks to Gens.
+
 
 ## Workflows
 
-ref                                                       | description
-----------------------------------------------------------|------------------------------------------------------------------------
-st2_annotationtracks.update_structuralvariant_tracks_gens | Workflow for generating and updating structural variant annotationtracks in Gens.
-st2_annotationtracks.update_genomic_elements              | Workflow for generating and updating genomic element annotationtracks in Gens.
-st2_annotationtracks.update_informative_tracks_gens       | Workflow for generating and updating informative annotationtracks in Gens.
+ref                                                   | description
+------------------------------------------------------|------------------------------------------------------------------------
+Annotationtracks.update_structuralvariant_tracks_gens | Workflow for generating and updating structural variant annotationtracks in Gens.
+Annotationtracks.update_genomic_elements              | Workflow for generating and updating genomic element annotationtracks in Gens.
+Annotationtracks.update_informative_tracks_gens       | Workflow for generating and updating informative annotationtracks in Gens.
 
 ## Rules
 
-ref                                                        | description
------------------------------------------------------------|------------------------------------------------------------------------
-st2_annotationtracks.update_annotation_tracks              | Generate a timer to update the annotationtracks every friday at 18.
+ref                                                    | description
+-------------------------------------------------------|------------------------------------------------------------------------
+Annotationtracks.update_annotation_tracks              | Generate a timer to update the annotationtracks every friday at 18.
 
 

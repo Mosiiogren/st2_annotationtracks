@@ -7,12 +7,11 @@ from pathlib import Path
 
 from st2common.runners.base_action import Action
 
-
 COLOR = {
-    "Triplosensitivity": "0, 100, 0",
-    "Haploinsufficiency": "0, 0, 0",
-    "Triplosensitivity&Haploinsufficiency": "50, 250, 50",
-    "Dosage sensitivity unlikely": "144, 238, 144",
+    "Triplosensitivity": "80, 255, 80",
+    "Haploinsufficiency": "241, 0, 241",
+    "Triplosensitivity&Haploinsufficiency": "80, 1, 80",
+    "Dosage sensitivity unlikely": "0, 80, 0",
     "Unknown": "100, 100, 150",
 }
 
@@ -111,6 +110,50 @@ class DosageSensativeData(Action):
 
         df.loc[
             (
+                (
+                    (
+                        df["Haploinsufficiency Description"]
+                        != "Dosage sensitivity unlikely"
+                    )
+                    & (df["Haploinsufficiency Description"] != "Not yet evaluated")
+                    & (df["Haploinsufficiency Description"] != "No evidence available")
+                )
+                & (
+                    (
+                        df["Triplosensitivity Description"]
+                        == "Dosage sensitivity unlikely"
+                    )
+                    | (df["Triplosensitivity Description"] == "Not yet evaluated")
+                    | (df["Triplosensitivity Description"] == "No evidence available")
+                )
+            ),
+            "color",
+        ] = COLOR["Haploinsufficiency"]
+
+        df.loc[
+            (
+                (
+                    (
+                        df["Triplosensitivity Description"]
+                        != "Dosage sensitivity unlikely"
+                    )
+                    & (df["Triplosensitivity Description"] != "Not yet evaluated")
+                    & (df["Triplosensitivity Description"] != "No evidence available")
+                )
+                & (
+                    (
+                        df["Haploinsufficiency Description"]
+                        == "Dosage sensitivity unlikely"
+                    )
+                    | (df["Haploinsufficiency Description"] == "Not yet evaluated")
+                    | (df["Haploinsufficiency Description"] == "No evidence available")
+                )
+            ),
+            "color",
+        ] = COLOR["Triplosensitivity"]
+
+        df.loc[
+            (
                 (df["Haploinsufficiency Description"] == "Dosage sensitivity unlikely")
                 & (df["Triplosensitivity Description"] == "Dosage sensitivity unlikely")
             ),
@@ -183,6 +226,7 @@ class DosageSensativeData(Action):
                     "chromosome",
                     "start",
                     "end",
+                    "color",
                     "comments",
                 ]
             ),

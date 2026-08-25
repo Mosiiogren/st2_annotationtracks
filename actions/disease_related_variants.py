@@ -8,7 +8,6 @@ from pathlib import Path
 
 from st2common.runners.base_action import Action
 
-
 CHROMS = {
     "1": 248_956_422,
     "2": 242_193_529,
@@ -36,6 +35,17 @@ CHROMS = {
     "Y": 57_227_415,
 }
 
+COLOR = {
+    "benign": "50, 227, 255",
+    "variants of uncertain significance": "204, 253, 255",
+    "na; variants of uncertain significance; na": "204, 253, 255",
+    "na; pathogenic; variants of uncertain significance": "204, 253, 255",
+    "pathogenic/likely pathogenic": "204, 155, 122",
+    "likely pathogenic": "153, 96, 53",
+    "pathogenic": "102, 47, 0",
+    "Unknown": "153, 153, 153",
+}
+
 
 class DiseaseRelatedSVs(Action):
 
@@ -47,6 +57,7 @@ class DiseaseRelatedSVs(Action):
 
         df = self.get_genomic_position(results)
         df = self.add_comments(df)
+        df = self.add_color(df)
         filename = self.create_annotationtrack_files(df, outputfolder, filename)
 
         return (True, filename)
@@ -179,12 +190,6 @@ class DiseaseRelatedSVs(Action):
             + "Disease Diagnosis: "
             + df["Disease_Diagnosis"]
             + ";"
-            + "Genomic position: "
-            + df["Genome_Coordinate_Hg38"]
-            + ";"
-            + "Involved Gene: "
-            + df["Involved_Gene"]
-            + ";"
             + "Description of pathogenic mechanism [Most_Susceptible_gene]: "
             + df["Description_of_pathogenic_mechanism [Most_Susceptible_gene]"]
             + ";"
@@ -205,6 +210,21 @@ class DiseaseRelatedSVs(Action):
             + "Track created at: "
             + datetime.datetime.now().strftime("%c")
         )
+
+        return df
+
+    def add_color(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Function for adding a color to respectively SV type
+        """
+
+        for significance in df["Pathogenicity"].unique():
+            if significance.lower() in COLOR.keys():
+                df.loc[df["Pathogenicity"] == significance, "color"] = COLOR[
+                    significance.lower()
+                ]
+            else:
+                df.loc[df["Pathogenicity"] == significance, "color"] = COLOR["Unknown"]
 
         return df
 
@@ -241,6 +261,7 @@ class DiseaseRelatedSVs(Action):
                     "chromosome",
                     "start",
                     "end",
+                    "color",
                     "comments",
                 ]
             ),

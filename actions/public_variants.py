@@ -9,6 +9,13 @@ from gzip import decompress
 
 from st2common.runners.base_action import Action
 
+COLOR = {
+    "DEL": "230, 159, 0",
+    "DUP": "86, 180, 233",
+    "INS": "0, 158, 115",
+    "Unknown": "153, 153, 153",
+}
+
 
 class PublicStructuralVariantsData(Action):
 
@@ -35,10 +42,11 @@ class PublicStructuralVariantsData(Action):
 
             time.sleep(5)
 
-        df = self.add_comments(finaldf)
-        filename = self.create_annotationtrack_files(df, outputfolder, filename)
+        df = self.add_color(finaldf)
+        df = self.add_comments(df)
+        filenames = self.create_annotationtrack_files(df, outputfolder, filename)
 
-        return (True, filename)
+        return (True, filenames)
 
     def get_data(self, url: str, columns: list[str]) -> tuple[bool, pd.DataFrame | str]:
         """
@@ -95,7 +103,7 @@ class PublicStructuralVariantsData(Action):
         df = df.astype(str)
 
         df["comments"] = (
-            "Structural variants recieved from dbVar"
+            "dbVar CNV's for pathogenic/common variants in ClinVar"
             + ";"
             + "SV TYPE: "
             + df["Name"]
@@ -109,33 +117,51 @@ class PublicStructuralVariantsData(Action):
 
         return df
 
+    def add_color(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Function for adding a color to respectively SV type
+        """
+
+        for SVtype in df["Name"].unique():
+            if SVtype.upper() in COLOR.keys():
+                df.loc[df["Name"] == SVtype, "color"] = COLOR[SVtype.upper()]
+            else:
+                df.loc[df["Name"] == SVtype, "color"] = COLOR["Unknown"]
+
+        return df
+
     def create_annotationtrack_files(
         self, df: pd.DataFrame, outputfolder: str, filename: str
     ) -> list[str]:
 
         filenames = []
         for SVtype in df["Name"].unique():
-            df_copy = df[(df["Name"] == SVtype)]
+            for significance in df["clincal_significance"].unique():
+                df_copy = df[
+                    (df["Name"] == SVtype)
+                    & (df["clincal_significance"] == significance)
+                ]
 
-            if df_copy.empty:
-                continue
+                if df_copy.empty:
+                    continue
 
-            df_copy = df_copy.drop(
-                df_copy.columns.difference(
-                    [
-                        "chromosome",
-                        "start",
-                        "end",
-                        "comments",
-                    ]
-                ),
-                axis=1,
-            )
-            df_copy.to_csv(
-                (outputfolder + f"{filename}_{SVtype}.tsv"),
-                sep="\t",
-                index=False,
-            )
-            filenames.append(f"{filename}_{SVtype}.tsv")
+                df_copy = df_copy.drop(
+                    df_copy.columns.difference(
+                        [
+                            "chromosome",
+                            "start",
+                            "end",
+                            "color",
+                            "comments",
+                        ]
+                    ),
+                    axis=1,
+                )
+                df_copy.to_csv(
+                    (outputfolder + f"{filename}_{SVtype}_{significance}.tsv"),
+                    sep="\t",
+                    index=False,
+                )
+                filenames.append(f"{filename}_{SVtype}_{significance}.tsv")
 
         return filenames

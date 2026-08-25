@@ -8,7 +8,7 @@ parameters:
   urls:
     type: array
     description: Link to the SVs at dbVar, information seen at https://ftp.ncbi.nlm.nih.gov/pub/dbVar/sandbox/annotation/GRCh38/README
-    default: ["https://ftp.ncbi.nlm.nih.gov/pub/dbVar/sandbox/annotation/GRCh38/GRCh38.nr_deletions.common.bed.gz","https://ftp.ncbi.nlm.nih.gov/pub/dbVar/sandbox/annotation/GRCh38/GRCh38.nr_deletions.pathogenic.bed.gz","https://ftp.ncbi.nlm.nih.gov/pub/dbVar/sandbox/annotation/GRCh38/GRCh38.nr_duplications.common.bed.gz","https://ftp.ncbi.nlm.nih.gov/pub/dbVar/sandbox/annotation/GRCh38/GRCh38.nr_duplications.pathogenic.bed.gz",https://ftp.ncbi.nlm.nih.gov/pub/dbVar/sandbox/annotation/GRCh38/GRCh38.nr_insertions.common.bed.gz","https://ftp.ncbi.nlm.nih.gov/pub/dbVar/sandbox/annotation/GRCh38/GRCh38.nr_insertions.pathogenic.bed.gz"]
+    default: ["https://ftp.ncbi.nlm.nih.gov/pub/dbVar/sandbox/annotation/GRCh38/GRCh38.nr_insertions.common.bed.gz","https://ftp.ncbi.nlm.nih.gov/pub/dbVar/sandbox/annotation/GRCh38/GRCh38.nr_deletions.common.bed.gz","https://ftp.ncbi.nlm.nih.gov/pub/dbVar/sandbox/annotation/GRCh38/GRCh38.nr_deletions.pathogenic.bed.gz","https://ftp.ncbi.nlm.nih.gov/pub/dbVar/sandbox/annotation/GRCh38/GRCh38.nr_duplications.common.bed.gz","https://ftp.ncbi.nlm.nih.gov/pub/dbVar/sandbox/annotation/GRCh38/GRCh38.nr_duplications.pathogenic.bed.gz","https://ftp.ncbi.nlm.nih.gov/pub/dbVar/sandbox/annotation/GRCh38/GRCh38.nr_insertions.pathogenic.bed.gz"]
     position: 0
   outputfolder:
     type: string

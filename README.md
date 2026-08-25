@@ -33,8 +33,10 @@ Annotationtracks.regulatory_data                 | Retrieve and filter regulator
 Annotationtracks.public_variants                 | Retrieve and filter known pathogenic/common structural variants.
 Annotationtracks.dosage_sensitivity              | Retrieve and filter known dosage sensitive genes.
 Annotationtracks.disease_related_variants        | Retrieve and filter litterature based disease related variants.
-Annotationtracks.clinical_significance           | Retrieve and filter clinical isgnificant structural variants.
+Annotationtracks.clinical_significance           | Retrieve and filter clinical significant structural variants.
+Annotationtracks.acmg_genes                      | Retrieve and filter ACMG genes.                      
 Annotationtracks.upload_tracks_to_gens           | Uploads annotation tracks to Gens.
+
 
 
 ## Workflows
@@ -49,6 +51,7 @@ Annotationtracks.update_informative_tracks_gens       | Workflow for generating 
 
 ref                                                    | description
 -------------------------------------------------------|------------------------------------------------------------------------
-Annotationtracks.update_annotation_tracks              | Generate a timer to update the annotationtracks every friday at 18.
+Annotationtracks.update_structuralvariants_tracks      | Generate a timer to update the annotationtracks for structural variants every friday at 18.
+Annotationtracks.update_informative_tracks             | Generate a timer to update the informative (disease related SVs, clinical significant SVs, etc.) once every month
 
 

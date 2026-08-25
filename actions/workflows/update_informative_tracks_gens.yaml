@@ -15,12 +15,26 @@ vars:
 
 
 tasks:
+  get_acmg_genes:
+    action: annotationtracks.acmg_genes
+    next:
+      - when: "{{ succeeded() }}"
+        publish:
+          - annnotationtracks: <% result().result %>
+        do:
+          - get_disease_related_variants
+      - when: "{{ failed() }}"
+        publish:
+          - msg: <% result().get(ctx().hosts).stderr %>
+        do:
+          - report_failure
+
   get_disease_related_variants:
     action: annotationtracks.disease_related_variants
     next:
       - when: "{{ succeeded() }}"
         publish:
-          - annnotationtracks: <% result().result %>
+          - annnotationtracks: <% ctx().annnotationtracks + result().result %>
         do:
           - get_phenotype_data
       - when: "{{ failed() }}"

@@ -5,10 +5,10 @@ description: ACMG genes from dbVar
 runner_type: python-script
 entry_point: acmg_genes.py
 parameters:
-  urls:
+  url:
     type: string
     description: Link to the SVs at dbVar, information seen at https://ftp.ncbi.nlm.nih.gov/pub/dbVar/sandbox/annotation/GRCh38/README
-    default: https://ftp.ncbi.nlm.nih.gov/pub/dbVar/sandbox/annotation/GRCh38/ACMG_genes.gff.gz
+    default: "https://ftp.ncbi.nlm.nih.gov/pub/dbVar/sandbox/annotation/GRCh38/ACMG_genes.gff.gz"
     position: 0
   outputfolder:
     type: string
@@ -19,12 +19,17 @@ parameters:
   columns:
     type: array
     description: List of columns in the dataframe
-    default: ["chromosome","start", "end", "info"]
+    default: ["chromosome","col2","col3","start","end","col6","col7","col8","info"]
     immutable: True
     position: 2
+  attributes:
+    type: array
+    description: List of attributes
+    default: ["description","gene","gene_biotype","gene_synonym"]
+    position: 3
   filename:
     type: string
     description: Path 
     default: "ACMG_genes.tsv"
     immutable: True
-    position: 3
+    position: 4

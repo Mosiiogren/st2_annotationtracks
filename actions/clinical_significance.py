@@ -52,9 +52,9 @@ class ClinicalSignificance(Action):
 
         finaldf = self.add_comments(finaldf, attributes)
         finaldf = self.add_color(finaldf)
-        filename = self.create_annotationtrack_files(finaldf, outputfolder, filename)
+        filenames = self.create_annotationtrack_files(finaldf, outputfolder, filename)
 
-        return (True, filename)
+        return (True, filenames)
 
     def get_data(
         self, url: str, columns: list, attributes: list
@@ -211,29 +211,32 @@ class ClinicalSignificance(Action):
         self, df: pd.DataFrame, outputfolder: str, filename: str
     ) -> list[str]:
 
-        df = df.drop(
-            df.columns.difference(
-                [
-                    "chromosome",
-                    "start",
-                    "end",
-                    "comments",
-                    "color",
-                ]
-            ),
-            axis=1,
-        )
-
         df["start"] = df["start"].astype("int")
         df["end"] = df["end"].astype("int")
 
-        df.to_csv(
-            (outputfolder + filename),
-            sep="\t",
-            index=False,
-        )
+        filenames = []
+        for significance in df["clinical_int"].unique():
 
-        return [filename]
+            df_copy = df[df["clinical_int"] == significance]
 
+            df_copy = df_copy.drop(
+                df_copy.columns.difference(
+                    [
+                        "chromosome",
+                        "start",
+                        "end",
+                        "comments",
+                        "color",
+                    ]
+                ),
+                axis=1,
+            )
 
-# https://ftp.ensembl.org/pub/release-113/variation/MaveDB/
+            df_copy.to_csv(
+                (outputfolder + f"{filename}_{significance}.tsv"),
+                sep="\t",
+                index=False,
+            )
+            filenames.append(f"{filename}_{significance}.tsv")
+
+        return filenames

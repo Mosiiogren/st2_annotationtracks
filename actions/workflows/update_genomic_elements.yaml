@@ -1,7 +1,7 @@
 ---
 version: 1.0
 name: update_genomic_elements
-description: Workflow to create regulatory elements files for clustering and create annotationtracks for Gens
+description: Workflow to create regulatory elements files for clustering and create informative (phenotype, dosage sensitivity ...) annotationtracks and update the annotationtracks in Gens
 
 
 input:
@@ -28,6 +28,11 @@ tasks:
           - annnotationtracks: <% result().result %>
         do:
           - get_gene_data
+      - when: "{{ failed() }}"
+        publish:
+          - msg: <% result().get(ctx().hosts).stderr %>
+        do:
+          - report_failure
 
   get_gene_data:
     action: annotationtracks.gene_data
@@ -40,6 +45,11 @@ tasks:
           - annnotationtracks: <% ctx().annnotationtracks + result().result %>
         do:
           - upload_into_gens
+      - when: "{{ failed() }}"
+        publish:
+          - msg: <% result().get(ctx().hosts).stderr %>
+        do:
+          - report_failure
 
   upload_into_gens:
     action: annotationtracks.upload_tracks_to_gens
@@ -50,4 +60,21 @@ tasks:
       - when: "{{ succeeded() }}"
         publish:
           - msg: "Annotationtracks has been copied and uploaded to Gens"
+      - when: "{{ failed() }}"
+        publish:
+          - msg: <% result().get(ctx().hosts).stderr %>
+        do:
+          - report_failure
+  
+  report_failure:
+    action: core.inject_trigger
+    input:
+      trigger_name: gmc_norr_analysis.email_notification
+      payload:
+        subject: >
+          Failed to update annotationtracks in Gens
+        message: <% ctx().msg %>
+    next:
+      - when: "{{ succeeded() }}"
+        do: fail
         

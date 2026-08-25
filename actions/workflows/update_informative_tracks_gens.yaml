@@ -1,7 +1,7 @@
 ---
 version: 1.0
 name: update_informative_tracks_gens
-description: Workflow to create informative (phenotype, dosage sensitivity ...) annotationtracks and update the existing annotationtracks in Gens
+description: Workflow to create informative (phenotype, dosage sensitivity ...) annotationtracks and update the annotationtracks in Gens
 
 
 input:
@@ -23,6 +23,11 @@ tasks:
           - annnotationtracks: <% result().result %>
         do:
           - get_phenotype_data
+      - when: "{{ failed() }}"
+        publish:
+          - msg: <% result().get(ctx().hosts).stderr %>
+        do:
+          - report_failure
     
   get_phenotype_data:
     action: annotationtracks.clinical_significance
@@ -32,6 +37,11 @@ tasks:
           - annnotationtracks: <% ctx().annnotationtracks + result().result %>
         do:
           - get_dosage_sensitivity
+      - when: "{{ failed() }}"
+        publish:
+          - msg: <% result().get(ctx().hosts).stderr %>
+        do:
+          - report_failure
   
   get_dosage_sensitivity:
     action: annotationtracks.dosage_sensitivity
@@ -41,15 +51,27 @@ tasks:
           - annnotationtracks: <% ctx().annnotationtracks + result().result %>
         do:
           - get_public_variants
+      - when: "{{ failed() }}"
+        publish:
+          - msg: <% result().get(ctx().hosts).stderr %>
+        do:
+          - report_failure
   
   get_public_variants:
     action: annotationtracks.public_variants
+    input:
+      timeout: 1000
     next:
       - when: "{{ succeeded() }}"
         publish:
           - annnotationtracks: <% ctx().annnotationtracks + result().result %>
         do:
           - upload_into_gens
+      - when: "{{ failed() }}"
+        publish:
+          - msg: <% result().get(ctx().hosts).stderr %>
+        do:
+          - report_failure
 
   upload_into_gens:
     action: annotationtracks.upload_tracks_to_gens
@@ -60,7 +82,21 @@ tasks:
       - when: "{{ succeeded() }}"
         publish:
           - msg: "Annotationtracks has been copied and uploaded to Gens"
-
-
-
-
+      - when: "{{ failed() }}"
+        publish:
+          - msg: <% result().get(ctx().hosts).stderr %>
+        do:
+          - report_failure
+  
+  report_failure:
+    action: core.inject_trigger
+    input:
+      trigger_name: gmc_norr_analysis.email_notification
+      payload:
+        subject: >
+          Failed to update annotationtracks in Gens
+        message: <% ctx().msg %>
+    next:
+      - when: "{{ succeeded() }}"
+        do: fail
+        

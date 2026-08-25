@@ -1,7 +1,7 @@
 ---
 version: 1.0
 name: update_structuralvariant_tracks_gens
-description: Workflow to create annotationtracks and update the existing annotationtracks in Gens
+description: Workflow to create annotationtracks and update the annotationtracks in Gens
 
 
 input:

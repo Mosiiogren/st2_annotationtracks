@@ -19,7 +19,7 @@ parameters:
   columns:
     type: array
     description: List of columns in the dataframe
-    default: ["chromosome","col2","Name","start","end","col6","col7","col8","col9"]
+    default: ["chromosome","source","Name","start","end","col6","col7","col8","info"]
     position: 2
   attributes:
     type: array

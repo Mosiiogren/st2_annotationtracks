@@ -15,7 +15,7 @@ parameters:
     type: string
     default: "{{ config_context.cwd }}"
     immutable: True
-  annnotationtracks:
+  annotationtracks:
     type: array
     description: List containing the annotationtracks that is being uploaded to Gens
     required: True

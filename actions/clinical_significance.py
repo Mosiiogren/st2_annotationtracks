@@ -144,16 +144,12 @@ class ClinicalSignificance(Action):
         Function for adding a column consisting of comments
         Comments are visually separate in Gens by ;
         """
-        # df["comments"] = "SV TYPE: " + df["Name"].astype(str) + ";"
-        # for attribute in attributes:
-        #     df["comments"].map(
-        #         lambda lst: lst.append(attribute + df[attribute].astype(str) + ";")
-        #     )
 
         df = df.astype(str)
 
         df["comments"] = (
-            "dbVar"
+            "Source: "
+            + df["source"]
             + ";"
             + "Clinical significance: "
             + df["clinical_int"]

@@ -10,28 +10,33 @@ parameters:
     description: CSV file containing variant data
     default: "/storage/refrencedata/sv_variants.csv"
     position: 0
+  variantidfile:
+    type: string
+    description: CSV file containing variant data
+    default: "/storage/refrencedata/sv_variants_id.json"
+    position: 1
   genedata:
     type: string
     description: Path to the stored gene data
     default: "{{ config_context.outputfilegene }}"
     immutable: True
-    position: 1
+    position: 2
   regulatorydata:
     type: string
     description: Path to where the regulatory data has been stored
     default: "{{ config_context.outputfileregulatory }}"
     immutable: True
-    position: 2
+    position: 3
   exondata:
     type: string
     description: Path to where the exon data has been stored
     default: "{{ config_context.outputfileexon }}"
     immutable: True
-    position: 3
+    position: 4
   outputfileclusters:
     type: string
     description: Path to where the clusters should be stored
     default: "{{ config_context.outputfileclusters }}"
     immutable: True
-    position: 4
+    position: 5
   

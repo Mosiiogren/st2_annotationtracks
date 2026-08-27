@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
-
 from pathlib import Path
+
 from st2common.runners.base_action import Action
 
 
@@ -33,22 +33,37 @@ class ClusteringData(Action):
         self.SV_range_small = 500
 
         self.number_of_clusters = 0
-        self.count = 0
         self.minimum_overlapping_genomic_elements_percentage = 1
 
     def run(
         self,
         variantfile: str,
+        variantidfile: str,
         genedata: str,
         regulatorydata: str,
         exondata: str,
         outputfileclusters: str,
     ) -> tuple[bool, str]:
 
+        ### https://stackoverflow.com/questions/62148301/mongoexport-data-from-last-n-minutes-of-document-using-timestamp-from-objectid
+
         df_variant = pd.read_csv(variantfile)
         df_gene = pd.read_json(genedata, orient="records")
         df_regulatory = pd.read_json(regulatorydata, orient="records")
         df_exon = pd.read_json(exondata, orient="records")
+
+        if Path(variantidfile).exists():
+            self.df_clusters = pd.read_json(outputfileclusters, orient="records")
+            self.number_of_clusters = self.df_clusters["cluster_number"].max()
+
+            df_variant_id_old = pd.read_json(variantidfile, orient="records")
+            df_variant = df_variant[~df_variant["_id"].isin(df_variant_id_old["_id"])]
+            df_variant_id_all = df_variant.merge(df_variant_id_old, how="outer")[
+                ["_id"]
+            ]
+
+        else:
+            df_variant_id_all = df_variant
 
         df_variant = self.filter_variant_data(df_variant)
 
@@ -142,7 +157,12 @@ class ClusteringData(Action):
 
         self.df_clusters.to_json(outputfileclusters, orient="records")
 
-        return (True, f"Clusters are stored in {outputfileclusters}")
+        df_variant_id_all[["_id"]].to_json(variantidfile, orient="records")
+
+        return (
+            True,
+            f"Clusters are stored in {outputfileclusters} and variant IDs are stored in {variantidfile}",
+        )
 
     def filter_variant_data(self, df: pd.DataFrame) -> pd.DataFrame:
         df = df.rename(

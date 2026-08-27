@@ -166,10 +166,10 @@ class Annotationtracks(Action):
                     axis=1,
                 )
                 df_copy.to_csv(
-                    (outputfolder + f"annotationtrackfiles_{category}_{SVtype}.tsv"),
+                    (outputfolder + f"Local_SVs_{category}_{SVtype}.tsv"),
                     sep="\t",
                     index=False,
                 )
-                filenames.append(f"annotationtrackfiles_{category}_{SVtype}.tsv")
+                filenames.append(f"Local_SVs_{category}_{SVtype}.tsv")
 
         return filenames

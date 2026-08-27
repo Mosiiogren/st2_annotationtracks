@@ -1,4 +1,4 @@
-name: timer
+name: informative_annotationtrack_timer
 pack: annotationtracks
 description: Set timer to update informative annotationtracks once a month
 enabled: true
@@ -7,13 +7,13 @@ trigger:
   type: "core.st2.CronTimer"
   parameters:
       timezone: "UTC"
-      day: "25"
-      hour: "11"
+      month: "*"
+      day: "1"
+      hour: "0"
       minute: "0"
       second: "0"
 
 action:
   ref: annotationtracks.update_informative_tracks_gens
-  parameters:
-    hosts: "{{ config_context.hosts }}"
-    cwd: "{{ config_context.cwd }}"
+
+    

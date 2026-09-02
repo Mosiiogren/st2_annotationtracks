@@ -148,7 +148,7 @@ class ClinicalSignificance(Action):
         df = df.astype(str)
 
         df["comments"] = (
-            "Source: "
+            "Data retrieved from "
             + df["source"]
             + ";"
             + "Clinical significance: "

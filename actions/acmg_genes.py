@@ -30,9 +30,6 @@ class ClinicalSignificance(Action):
         finaldf = self.add_comments(finaldf, attributes)
         filename = self.create_annotationtrack_files(finaldf, outputfolder, filename)
 
-        print(finaldf)
-        print(finaldf["comments"])
-
         return (True, filename)
 
     def get_data(
@@ -123,7 +120,7 @@ class ClinicalSignificance(Action):
         df = df.astype(str)
 
         df["comments"] = (
-            "Source: dbVar"
+            "Data retrieved from dbVar"
             + ";"
             + "Gene Name: "
             + df["gene"]

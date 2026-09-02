@@ -29,6 +29,6 @@ parameters:
   filename:
     type: string
     description: Path 
-    default: "ClinicalSignificance"
+    default: "ClinicalSignificantSVs"
     immutable: True
     position: 4

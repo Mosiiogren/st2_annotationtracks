@@ -184,7 +184,7 @@ class DosageSensativeData(Action):
         df = df.astype(str)
 
         df["comments"] = (
-            "ClinGen"
+            "Data retrieved from ClinGen"
             + ";"
             + "Gene Symbol: "
             + df["#Gene Symbol"]
